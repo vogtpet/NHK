@@ -4,19 +4,20 @@
 
 Naturheilkunde für den Hausgebrauch
 ============================ 
+
 ## 📥 Download:
-- 📄 **[PDF (Oktober 2026)](docs/NHK2026.pdf)**
-- 📄 **[ebook (Oktober 2026)](docs/NHK.epub)**
+- 📄 **[PDF (Oktober 2026)](docs/NHK2026.pdf?download=1)**
+- 📄 **[ebook (Oktober 2026)](docs/NHK.epub?download=1)**
 
 a) Werk & Urheberschaft:
 -----------
-Autor: Willi Vogt (1939–2023, ehem. Naturheilpraxis Boppard)
-Mitarbeit & wissenschaftliche Bearbeitung: Reinhild Vogt, Dr. Peter Vogt
+Autor: Willi Vogt (1939–2023, ehem. Naturheilpraxis Boppard)  
+Mitarbeit & wissenschaftliche Bearbeitung: Reinhild Vogt, Dr. Peter Vogt  
 Aktualisierte Neuauflage: Oktober 2026
 
 b) Urheberrecht & Veröffentlichung:
 -----------
-Das Werk wurde ursprünglich im Eigenverlag als kommerzielles E-Book unter der ISBN 978-3-00-039171-2 veröffentlicht. Die digitale Neuauflage im Jahr 2026 wird durch den rechtmäßigen Erben Dr. Peter Vogt unter den Bedingungen der Creative-Common-Lizenz CC-BY 4.0 International frei zur Verfügung gestellt.
+Das Werk wurde ursprünglich im Eigenverlag als kommerzielles E-Book unter der ISBN 978-3-00-039171-2 veröffentlicht. Die digitale Neuauflage im Jahr 2026 wird durch den rechtmäßigen Erben Dr. Peter Vogt unter den Bedingungen der Creative-Commons-Lizenz CC-BY 4.0 International frei zur Verfügung gestellt.
 
 c) Lizenzbestimmungen:
 -----------
@@ -24,8 +25,8 @@ Dieses E-Book steht unter der Lizenz Creative Commons Namensnennung 4.0 Internat
 
 d) Bild- und Grafiknachweise:
 -----------
-Umschlagseite: © by Christiane Fischbach
-Grafiken im Text: © by Riccardo Lauri
+Umschlagseite: © by Christiane Fischbach  
+Grafiken im Text: © by Riccardo Lauri  
 Fotos im Text: Bildmaterial von Pixabay (unter Pixabay-Lizenz/Content License)
 
 e) Hinweis zur Barrierefreiheit:
@@ -36,7 +37,7 @@ f) Wichtiger Hinweis & Haftungsausschluss (Medizinischer Disclaimer):
 -----------
 Die in diesem Buch bereitgestellten Informationen, praktischen Tipps und naturheilkundlicher Verfahren basieren auf den langjährigen Erfahrungen und der praktischen Tätigkeit des Autors als Heilpraktiker. Sie wurden mit größter Sorgfalt zusammengestellt und dienen ausschließlich der allgemeinen Information, der Aufklärung und der Selbsthilfe bei leichten Befindlichkeitsstörungen.
 
-Kein Ersatz für ärztlichen Rat:
+**Kein Ersatz für ärztlichen Rat:**  
 Die Inhalte dieses Werkes ersetzen in keinem Fall eine professionelle medizinische Beratung, Diagnose oder Behandlung durch einen approbierten Arzt, Facharzt oder Therapeuten. Suchen Sie bei gesundheitlichen Beschwerden, chronischen Leiden oder anhaltenden Symptomen stets qualifizierten ärztlichen Rat auf.
 
 g) Eigenverantwortung & Haftungsausschluss:
@@ -50,8 +51,5 @@ Verantwortlich für die Neuveröffentlichung (Erbe): Dr. Peter Vogt, Michael-Bac
 Bezugsquelle
 ==========
 
-Dieses E-Book ist dauerhaft frei und kostenlos erhältlich unter:
+Dieses E-Book ist dauerhaft frei und kostenlos erhältlich unter:  
 GitHub: https://github.com/vogtpet/NHK
-
-
-
