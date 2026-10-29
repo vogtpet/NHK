@@ -50,8 +50,8 @@ h) Herausgeber & Kontakt (Impressum):
 -----------
 Verantwortlich für die Neuveröffentlichung (Erbe): Dr. Peter Vogt, Michael-Bach-Straße 1, 56154 Boppard.
 
-Bezugsquelle
-==========
+Bezugsquelle:
+===========
 
 Dieses E-Book ist dauerhaft frei und kostenlos erhältlich unter:  
 GitHub: https://github.com/vogtpet/NHK
