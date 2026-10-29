@@ -6,9 +6,9 @@ Naturheilkunde für den Hausgebrauch
 ============================ 
 
 ## 📥 Download & Online Lesen:
-- 🌐 **[Direkt im Browser lesen (Interaktiv)](https://github.io)**
-- 📄 **[PDF-Version herunterladen (Oktober 2026)](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.pdf)**
-- 📄 **[eBook-Version herunterladen (Oktober 2026)](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.epub)**
+- 🌐 **[Direkt im Browser lesen (Interaktiv)](https://vogtpet.github.io/NHK/)**
+- 📄 **[PDF-Version herunterladen (8 MB, 10/2026)](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.pdf)**
+- 📄 **[eBook-Version herunterladen (27 MB, 10/2026)](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.epub)**
 
 
 a) Werk & Urheberschaft:
