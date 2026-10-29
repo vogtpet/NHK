@@ -4,8 +4,9 @@
 
 Naturheilkunde für den Hausgebrauch
 ============================ 
-
-Praktische Tipps zur Selbsthilfe vom Heilpraktiker
+## 📥 Download:
+- 📄 **[PDF (Oktober 2026)](docs/NHK2026.pdf)**
+- 📄 **[ebook (Oktober 2026)](docs/NHK.epub)**
 
 a) Werk & Urheberschaft:
 -----------
