@@ -590,6 +590,26 @@
         // Core Base PDF Target URL
         const pdfBaseUrl = "docs/NHK2026.pdf";
         
+        document.addEventListener("DOMContentLoaded", function() {
+    // Detect macOS Chromium (Chrome, Edge, Opera) but exclude native Safari
+    const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(navigator.userAgent);
+    const isChromium = !!window.chrome || (navigator.userAgent.indexOf("Chrome") > -1);
+    
+    if (isMac && isChromium) {
+        // Elements are fetched inside the listener so they exist safely
+        const sidebarEl = document.getElementById('sidebar');
+        const toggleEl = document.getElementById('menuToggle');
+        const noticeEl = document.getElementById('mobileNotice');
+        const iframeEl = document.getElementById('pdfViewer');
+        
+        if (sidebarEl) sidebarEl.style.display = 'none';
+        if (toggleEl) toggleEl.style.display = 'none';
+        if (noticeEl) noticeEl.style.display = 'none';
+        if (iframeEl) iframeEl.style.width = '100%';
+    }
+});
+
+        
 
 function goToPage(pageNumber) {
     // Advanced iOS environment and iPad check
