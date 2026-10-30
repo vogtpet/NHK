@@ -590,27 +590,31 @@
         // Core Base PDF Target URL
         const pdfBaseUrl = "docs/NHK2026.pdf";
         
+
 function goToPage(pageNumber) {
     // Advanced iOS environment and iPad check
     const isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || 
                   (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
     if (isIOS) {
-        // Safe, single-page cloud deployment of PDF.js that permits external CORS documents
-        const fullPdfUrl = window.location.origin + "/" + pdfBaseUrl;
-        pdfViewer.src = "https://onrender.com" + encodeURIComponent(fullPdfUrl) + "#page=" + pageNumber;
+        // Ultimate single-page fix for iOS: Open natively in the SAME tab. 
+        // This lets users use Safari's back arrow (<) to return to your scrollable menu seamlessly!
+        window.location.href = pdfBaseUrl + "#page=" + pageNumber;
     } else {
-        // Fast, high-performance native rendering for Desktop & Android
-        if (pdfViewer) {
-            pdfViewer.src = pdfBaseUrl + "#page=" + pageNumber;
+        // Fast, high-performance native rendering for Desktop & Android layouts
+        const viewer = document.getElementById('pdfViewer');
+        if (viewer) {
+            viewer.src = pdfBaseUrl + "#page=" + pageNumber;
         }
     }
 
     // Automatically dismiss the nav overlay menu drawer on mobile layouts
-    if (window.innerWidth <= 600 && sidebar) {
-        sidebar.classList.remove('active');
+    const sidebarEl = document.getElementById('sidebar');
+    if (window.innerWidth <= 600 && sidebarEl) {
+        sidebarEl.classList.remove('active');
     }
 }
+
 
 
 
