@@ -590,34 +590,6 @@
         // Core Base PDF Target URL
         const pdfBaseUrl = "docs/NHK2026.pdf";
         
-        
-        document.addEventListener("DOMContentLoaded", function() {
-    // 1. Check for macOS
-    const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(navigator.userAgent);
-    
-    // 2. Check for Chromium engines (Chrome, Edge, Opera) while excluding Safari
-    const isChromium = !!window.chrome || (navigator.userAgent.indexOf("Chrome") > -1);
-    
-    // 3. If it's Chrome/Chromium on macOS, completely disable your custom left navigation panel
-    if (isMac && isChromium) {
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        const mobileNotice = document.getElementById('mobileNotice');
-        
-        // Hide the custom sidebar drawer elements completely
-        if (sidebar) sidebar.style.display = 'none';
-        if (menuToggle) menuToggle.style.display = 'none';
-        if (mobileNotice) mobileNotice.style.display = 'none';
-        
-        // Expand the iframe width to occupy the entire screen space
-        const iframe = document.getElementById('pdfViewer');
-        if (iframe) {
-            iframe.style.width = '100%';
-        }
-    }
-});
-
-        
 
 function goToPage(pageNumber) {
     // Advanced iOS environment and iPad check
