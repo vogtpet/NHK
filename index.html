@@ -597,9 +597,13 @@ function goToPage(pageNumber) {
                   (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
     if (isIOS) {
-        // Ultimate single-page fix for iOS: Open natively in the SAME tab. 
-        // This lets users use Safari's back arrow (<) to return to your scrollable menu seamlessly!
-        window.location.href = pdfBaseUrl + "#page=" + pageNumber;
+        // Safe programmatic dispatch: Forces iOS Safari to treat the click as a real navigation event
+        const safeLink = document.createElement('a');
+        safeLink.href = pdfBaseUrl + "#page=" + pageNumber;
+        safeLink.style.display = 'none';
+        document.body.appendChild(safeLink);
+        safeLink.click();
+        document.body.removeChild(safeLink);
     } else {
         // Fast, high-performance native rendering for Desktop & Android layouts
         const viewer = document.getElementById('pdfViewer');
@@ -614,6 +618,7 @@ function goToPage(pageNumber) {
         sidebarEl.classList.remove('active');
     }
 }
+
 
 
 
