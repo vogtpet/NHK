@@ -175,19 +175,34 @@
         }
 
         /* Responsive Configuration for Narrow Mobile Screens */
+        /* Replace your existing @media block with this updated version */
         @media (max-width: 600px) {
             .menu-toggle {
                 display: block;
+                cursor: pointer;
+                -webkit-tap-highlight-color: rgba(0,0,0,0);
             }
+    
+            /* CRITICAL FOR IOS: Tells Safari these list items are interactive targets */
+            .toc-item, .toc-link, .toc-link * {
+                cursor: pointer !important;
+                -webkit-tap-highlight-color: rgba(0,0,0,0);
+            }
+        
             .right-nav .btn-download {
                 display: none;
             }
+        
             .mobile-notice {
                 display: block;
             }
+        
+            /* Accounts for changing browser toolbars on mobile devices */
             .main-container {
                 height: calc(100% - 84px);
+                height: calc(100dvh - 84px); 
             }
+        
             .sidebar {
                 position: absolute;
                 left: 0;
@@ -195,8 +210,10 @@
                 bottom: 0;
                 z-index: 5;
                 transform: translateX(-100%);
-                box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+                -webkit-overflow-scrolling: touch; /* Smooth physics scrolling on iOS */
             }
+        
             .sidebar.active {
                 transform: translateX(0);
             }
@@ -572,16 +589,26 @@
 
         // Core Base PDF Target URL
         const pdfBaseUrl = "docs/NHK2026.pdf";
-
-        // Navigation Engine: Jumps canvas viewport seamlessly to desired PDF page offset
+        
+        
         function goToPage(pageNumber) {
-            pdfViewer.src = pdfBaseUrl + "#page=" + pageNumber;
-            
-            // On mobile layouts, close the drawer automatically after tapping a section
-            if (window.innerWidth <= 600) {
-                sidebar.classList.remove('active');
-            }
-        }
+    // Check if the user is using an iPhone, iPad, or iPod
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    if (isIOS) {
+        // iOS Fix: Instead of breaking inside the iframe, open the exact page in a clean new tab
+        window.open(pdfBaseUrl + "#page=" + pageNumber, '_blank');
+    } else {
+        // Desktop / Android: Keep using the fast internal reader layout
+        pdfViewer.src = pdfBaseUrl + "#page=" + pageNumber;
+    }
+
+    // On mobile layouts, close the drawer automatically after tapping a section
+    if (window.innerWidth <= 600) {
+        sidebar.classList.remove('active');
+    }
+}
+
 
         // Live Filtering Logic Snippet
         tocSearch.addEventListener('keyup', function() {
@@ -608,6 +635,60 @@
                 sidebar.classList.remove('active');
             }
         });
+
+// Sidebar Sliding Mechanics Controls
+menuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebar.classList.toggle('active');
+});
+
+document.addEventListener('click', (e) => {
+    if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+        sidebar.classList.remove('active');
+    }
+});
+
+
+// ============================================================
+// PASTE THE NEW COOPERATIVE IOS EVENT FIXED CODE DOWN HERE:
+// ============================================================
+
+// 1. Add touchstart event listeners to all Table of Contents links
+const allTocLinks = document.querySelectorAll('.toc-link');
+allTocLinks.forEach(link => {
+    link.addEventListener('touchstart', function(e) {
+        const onClickAttr = this.getAttribute('onclick');
+        if (onClickAttr) {
+            const pageMatch = onClickAttr.match(/\d+/);
+            if (pageMatch) {
+                e.preventDefault();
+                goToPage(parseInt(pageMatch, 10));
+            }
+        }
+    }, { passive: false });
+});
+
+// 2. Fix the Mobile Sidebar Toggle for iOS Safari Touch Events
+const originalMenuToggle = document.getElementById('menuToggle');
+if (originalMenuToggle) {
+    originalMenuToggle.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('sidebar').classList.toggle('active');
+    }, { passive: false });
+}
+
+// 3. Fix clicking outside the sidebar to close it on mobile
+document.addEventListener('touchstart', function(e) {
+    const sidebarEl = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('menuToggle');
+    if (sidebarEl && sidebarEl.classList.contains('active')) {
+        if (!sidebarEl.contains(e.target) && e.target !== toggleBtn) {
+            sidebarEl.classList.remove('active');
+        }
+    }
+});
+
     </script>
 </body>
 </html>

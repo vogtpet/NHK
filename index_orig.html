@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naturheilkunde für den Hausgebrauch - Online Lesen</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f4f9;
+        }
+        
+        /* Top Navigation Header Bar */
+        .header-bar {
+            height: 50px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 10;
+        }
+        .header-bar h1 {
+            font-size: 16px;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .right-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-download {
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-download:hover {
+            background-color: #219653;
+        }
+        
+        /* Interactive Mobile Sidebar Trigger */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        /* Mobile Alert Notice Box */
+        .mobile-notice {
+            display: none;
+            background-color: #f39c12;
+            color: #ffffff;
+            text-align: center;
+            padding: 8px 15px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: inset 0 -1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Core Layout Elements */
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: calc(100% - 50px);
+            position: relative;
+        }
+        .sidebar {
+            width: 300px;
+            background-color: #ffffff;
+            border-right: 1px solid #e1e4e8;
+            box-sizing: border-box;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            font-size: 13px;
+            color: #586069;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Search/Filter Tool Input Styling */
+        .search-box {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px 12px;
+            border: 1px solid #d1d5da;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        /* Table of Contents Layout Navigation */
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .toc-item {
+            display: block;
+        }
+        .toc-link {
+            color: #0366d6;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .toc-link:hover {
+            background-color: #f0f3f6;
+            text-decoration: none;
+        }
+        .page-badge {
+            background-color: #e1e4e8;
+            color: #444d56;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .sidebar-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sidebar-links a {
+            color: #586069;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .sidebar-links a:hover {
+            text-decoration: underline;
+        }
+        
+        iframe {
+            flex-grow: 1;
+            height: 100%;
+            border: none;
+        }
+
+        /* Responsive Configuration for Narrow Mobile Screens */
+        @media (max-width: 600px) {
+            .menu-toggle {
+                display: block;
+            }
+            .right-nav .btn-download {
+                display: none;
+            }
+            .mobile-notice {
+                display: block;
+            }
+            .main-container {
+                height: calc(100% - 84px);
+            }
+            .sidebar {
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 5;
+                transform: translateX(-100%);
+                box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Alert Notification Hook Layer -->
+    <div class="mobile-notice" id="mobileNotice">
+        💡 Tipp: Nutzen Sie das Menü ☰ links zur Schnellnavigation im Buch.
+    </div>
+
+    <div class="header-bar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="menu-toggle" id="menuToggle" aria-label="Menü öffnen">☰</button>
+            <h1>Naturheilkunde für den Hausgebrauch</h1>
+        </div>
+        <div class="right-nav">
+            <a class="btn-download" href="docs/NHK2026.pdf?download=1">PDF Download</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Responsive Navigation Sidebar with Search & ToC -->
+        <div class="sidebar" id="sidebar">
+            
+            <!-- Internal Filtering Snippet -->
+            <div>
+                <h2>Inhalt durchsuchen</h2>
+                <input type="text" id="tocSearch" class="search-box" placeholder="Kapitel filtern...">
+            </div>
+
+            <!-- Table of Contents Section Block -->
+            <div>
+                <h2>Inhaltsverzeichnis</h2>
+                <ul class="toc-list" id="tocList">
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(26)"><span>Vorwort</span><span class="page-badge">S. 26</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(30)"><span>Einleitung</span><span class="page-badge">S. 30</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(38)"><span>Abmagerung</span><span class="page-badge">S. 38</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(39)"><span>Abzess</span><span class="page-badge">S. 39</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(40)"><span>Akne</span><span class="page-badge">S. 40</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(44)"><span>Akupunkt-Massage</span><span class="page-badge">S. 44</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(45)"><span>Allergie</span><span class="page-badge">S. 45</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(55)"><span>Alter</span><span class="page-badge">S. 55</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(57)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Gesunde Ernährung</span><span class="page-badge">S. 57</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(62)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Kontakte pflegen</span><span class="page-badge">S. 62</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(63)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Körperliche Bewegung</span><span class="page-badge">S. 63</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(65)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Gehirn-Training</span><span class="page-badge">S. 65</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(70)"><span>Alzheimer</span><span class="page-badge">S. 70</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(78)"><span>Anämie</span><span class="page-badge">S. 78</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(80)"><span>Angst</span><span class="page-badge">S. 80</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(83)"><span>Appetitlosigkeit</span><span class="page-badge">S. 83</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(84)"><span>Arteriosklerose</span><span class="page-badge">S. 84</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(88)"><span>Arthrose</span><span class="page-badge">S. 88</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(93)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Knieschmerzen</span><span class="page-badge">S. 93</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(94)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Bakerzyste</span><span class="page-badge">S. 94</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(95)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Hüftschmerzen</span><span class="page-badge">S. 95</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(96)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Fingergelenke</span><span class="page-badge">S. 96</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(97)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Schulterschmerzen</span><span class="page-badge">S. 97</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(97)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nackenschmerzen</span><span class="page-badge">S. 97</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(99)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Arthritis</span><span class="page-badge">S. 99</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(100)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Primär chronische Polyarthritis</span><span class="page-badge">S. 100</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(102)"><span>Asthma</span><span class="page-badge">S. 102</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(105)"><span>Atmung</span><span class="page-badge">S. 105</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(108)"><span>Augen</span><span class="page-badge">S. 108</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(109)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Bindehautentzündung</span><span class="page-badge">S. 109</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(110)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Trockene Augen</span><span class="page-badge">S. 110</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(112)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Augenringe / Tränensäcke</span><span class="page-badge">S. 112</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(112)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Ödeme</span><span class="page-badge">S. 112</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(113)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Gerstenkorn</span><span class="page-badge">S. 113</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(113)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Hagelkorn</span><span class="page-badge">S. 113</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(113)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nachtblindheit</span><span class="page-badge">S. 113</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(114)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Makuladegeneration</span><span class="page-badge">S. 114</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(116)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Grauer Star</span><span class="page-badge">S. 116</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(118)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Grüner Star</span><span class="page-badge">S. 118</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(120)"><span>Autosuggestion</span><span class="page-badge">S. 120</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(122)"><span>Bandscheiben</span><span class="page-badge">S. 122</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(131)"><span>Bauchmassage</span><span class="page-badge">S. 131</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(132)"><span>Bechterew</span><span class="page-badge">S. 132</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(134)"><span>Blähungen</span><span class="page-badge">S. 134</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(136)"><span>Blase</span><span class="page-badge">S. 136</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(139)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Harn-Stau</span><span class="page-badge">S. 139</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(140)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Blasenkrebs</span><span class="page-badge">S. 140</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(141)"><span>Blutvergiftung</span><span class="page-badge">S. 141</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(142)"><span>Bronchitis</span><span class="page-badge">S. 142</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(143)"><span>&nbsp;&nbsp;&nbsp;&nbsp;C O P D</span><span class="page-badge">S. 143</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(145)"><span>Cholesterin</span><span class="page-badge">S. 145</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(149)"><span>Chronologie</span><span class="page-badge">S. 149</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(153)"><span>Corona</span><span class="page-badge">S. 153</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(154)"><span>Darm</span><span class="page-badge">S. 154</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(157)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Morbus Crohn</span><span class="page-badge">S. 157</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(158)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Colitis Ulcerosa</span><span class="page-badge">S. 158</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(158)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Divertikel</span><span class="page-badge">S. 158</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(159)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Reizdarm-Syndrom</span><span class="page-badge">S. 159</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(161)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Darmkrebs</span><span class="page-badge">S. 161</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(163)"><span>Depression</span><span class="page-badge">S. 163</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(168)"><span>Diabetes</span><span class="page-badge">S. 168</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(173)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Hyperglykämie</span><span class="page-badge">S. 173</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(174)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Hypoglykämie</span><span class="page-badge">S. 174</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(176)"><span>Dinkel-Brot</span><span class="page-badge">S. 176</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(179)"><span>Dorn Methode</span><span class="page-badge">S. 179</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(181)"><span>Durchblutung</span><span class="page-badge">S. 181</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(183)"><span>Durchfall</span><span class="page-badge">S. 183</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(186)"><span>Einlauf</span><span class="page-badge">S. 186</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(187)"><span>Eiweißspeicher</span><span class="page-badge">S. 187</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(189)"><span>Ekzem</span><span class="page-badge">S. 189</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(191)"><span>Entsäuerung</span><span class="page-badge">S. 191</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(197)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Basen im Organismus</span><span class="page-badge">S. 197</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(198)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Basische Mineralien</span><span class="page-badge">S. 198</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(199)"><span>&nbsp;&nbsp;&nbsp;&nbsp;pH-Wert Bestimmung</span><span class="page-badge">S. 199</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(200)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Entsäuerungsmittel</span><span class="page-badge">S. 200</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(202)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Anorganische Mineralstoffe</span><span class="page-badge">S. 202</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(203)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Organische Mineralstoffe</span><span class="page-badge">S. 203</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(204)"><span>Entzündungen</span><span class="page-badge">S. 204</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(209)"><span>Epilepsie</span><span class="page-badge">S. 209</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(214)"><span>Erbrechen</span><span class="page-badge">S. 214</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(214)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Ersticken / Anfall</span><span class="page-badge">S. 214</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(216)"><span>Erschöpfung / Stress</span><span class="page-badge">S. 216</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(220)"><span>Fasten</span><span class="page-badge">S. 220</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(222)"><span>Fersensporn</span><span class="page-badge">S. 222</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(223)"><span>Fibromyalgie</span><span class="page-badge">S. 223</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(225)"><span>Fieber</span><span class="page-badge">S. 225</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(227)"><span>Frauen</span><span class="page-badge">S. 227</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(228)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Schwangerschaft</span><span class="page-badge">S. 228</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(229)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Fehlgeburt</span><span class="page-badge">S. 229</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(229)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Frühgeburt</span><span class="page-badge">S. 229</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(229)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Geburt</span><span class="page-badge">S. 229</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(230)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Zyklusstörungen</span><span class="page-badge">S. 230</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(230)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Schwache Monatsblutung</span><span class="page-badge">S. 230</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(231)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Lange Monatsblutung</span><span class="page-badge">S. 231</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(232)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Häufige Monatsblutung</span><span class="page-badge">S. 232</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(232)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Schmerzhafte Blutung</span><span class="page-badge">S. 232</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(233)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Prämenstruelles Syndrom (PMS)</span><span class="page-badge">S. 233</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(235)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Wechseljahre / Klimakterium</span><span class="page-badge">S. 235</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(242)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Hitzewallungen</span><span class="page-badge">S. 242</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(243)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Sexualität und Wechseljahre</span><span class="page-badge">S. 243</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(243)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Beschwerden bei der Liebe</span><span class="page-badge">S. 243</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(244)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Harnwegs- und Genitalinfektionen</span><span class="page-badge">S. 244</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(244)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Harn-Inkontinenz</span><span class="page-badge">S. 244</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(246)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Brustkrebs / Vorbeugung</span><span class="page-badge">S. 246</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(254)"><span>Füße</span><span class="page-badge">S. 254</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(257)"><span>Galle</span><span class="page-badge">S. 257</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(258)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Gallensteine</span><span class="page-badge">S. 258</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(259)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Gallenkolik</span><span class="page-badge">S. 259</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(259)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Gallenblasenentzündung</span><span class="page-badge">S. 259</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(260)"><span>Gebete</span><span class="page-badge">S. 260</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(262)"><span>Gehen</span><span class="page-badge">S. 262</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(263)"><span>Geruchsverlust</span><span class="page-badge">S. 263</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(264)"><span>Geschmacksverlust</span><span class="page-badge">S. 264</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(265)"><span>Gicht</span><span class="page-badge">S. 265</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(268)"><span>Grippe</span><span class="page-badge">S. 268</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(270)"><span>Gürtelrose</span><span class="page-badge">S. 270</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(272)"><span>Haare</span><span class="page-badge">S. 272</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(274)"><span>Hämorrhoiden</span><span class="page-badge">S. 274</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(276)"><span>Hände</span><span class="page-badge">S. 276</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(276)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Karpaltunnel</span><span class="page-badge">S. 276</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(277)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Dupuytren</span><span class="page-badge">S. 277</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(277)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Raynaud-Syndrom</span><span class="page-badge">S. 277</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(277)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Feuchte Hände</span><span class="page-badge">S. 277</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(278)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Kalte Hände</span><span class="page-badge">S. 278</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(278)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Aufgesprungene Hände</span><span class="page-badge">S. 278</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(279)"><span>Halsschmerzen</span><span class="page-badge">S. 279</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(281)"><span>Haut</span><span class="page-badge">S. 281</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(284)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Hautkrebs</span><span class="page-badge">S. 284</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(285)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Aktinische Keratose</span><span class="page-badge">S. 285</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(286)"><span>Herz</span><span class="page-badge">S. 286</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(288)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Schwäche / Insuffizienz</span><span class="page-badge">S. 288</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(290)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nervöse Herzbeschwerden</span><span class="page-badge">S. 290</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(291)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Rhytmusstörungen</span><span class="page-badge">S. 291</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(293)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Herz-Krämpfe</span><span class="page-badge">S. 293</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(294)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Herz-Attacke</span><span class="page-badge">S. 294</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(294)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Herz-Infarkt</span><span class="page-badge">S. 294</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(299)"><span>Homocystein</span><span class="page-badge">S. 299</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(301)"><span>Husten / Heiserkeit</span><span class="page-badge">S. 301</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(306)"><span>Hypertonie</span><span class="page-badge">S. 306</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(313)"><span>Hypotonie</span><span class="page-badge">S. 313</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(315)"><span>Immunsystem</span><span class="page-badge">S. 315</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(321)"><span>Impotenz</span><span class="page-badge">S. 321</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(324)"><span>Insektenstiche</span><span class="page-badge">S. 324</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(326)"><span>Ischialgie-Hexenschuss</span><span class="page-badge">S. 326</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(329)"><span>Juckreiz</span><span class="page-badge">S. 329</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(331)"><span>Kinderkrankheiten</span><span class="page-badge">S. 331</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(332)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Diphtherie</span><span class="page-badge">S. 332</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(333)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Keuchhusten</span><span class="page-badge">S. 333</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(334)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Masern</span><span class="page-badge">S. 334</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(334)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Mumps</span><span class="page-badge">S. 334</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(335)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Ringelröteln</span><span class="page-badge">S. 335</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(336)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Röteln</span><span class="page-badge">S. 336</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(336)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Scharlach</span><span class="page-badge">S. 336</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(337)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Windpocken</span><span class="page-badge">S. 337</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(338)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Bauchschmerzen</span><span class="page-badge">S. 338</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(339)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Bettnässen</span><span class="page-badge">S. 339</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(340)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Blähungen</span><span class="page-badge">S. 340</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(340)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Durchfall</span><span class="page-badge">S. 340</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(341)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Fieber</span><span class="page-badge">S. 341</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(342)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Kindstod</span><span class="page-badge">S. 342</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(343)"><span>&nbsp;&nbsp;&nbsp;&nbsp;KISS-Syndrom</span><span class="page-badge">S. 343</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(343)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Krätze (Scabies)</span><span class="page-badge">S. 343</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(343)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Läuse</span><span class="page-badge">S. 343</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(344)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Milchschorf</span><span class="page-badge">S. 344</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(345)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Mundatmung</span><span class="page-badge">S. 345</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(345)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Pfeiffer´sches Drüsenfieber</span><span class="page-badge">S. 345</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(345)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Schlaflosigkeit</span><span class="page-badge">S. 345</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(346)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Schnupfen</span><span class="page-badge">S. 346</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(346)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Verstopfung</span><span class="page-badge">S. 346</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(347)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Windeldermatitis</span><span class="page-badge">S. 347</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(347)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Würmer</span><span class="page-badge">S. 347</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(348)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Zappelphilipp</span><span class="page-badge">S. 348</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(350)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Zahnen</span><span class="page-badge">S. 350</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(352)"><span>Klostersalz</span><span class="page-badge">S. 352</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(353)"><span>Kneipp-Therapie</span><span class="page-badge">S. 353</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(355)"><span>Kopfschmerzen</span><span class="page-badge">S. 355</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(358)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Migräne</span><span class="page-badge">S. 358</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(361)"><span>Korn (Vollkorn)</span><span class="page-badge">S. 361</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(362)"><span>Krampfadern</span><span class="page-badge">S. 362</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(365)"><span>Krebs</span><span class="page-badge">S. 365</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(366)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Übersäuerung</span><span class="page-badge">S. 366</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(367)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Freie Radikale</span><span class="page-badge">S. 367</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(367)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Vorbeugende Maßnahmen</span><span class="page-badge">S. 367</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(368)"><span>&nbsp;&nbsp;&nbsp;&nbsp;7 Krebs-Warnzeichen</span><span class="page-badge">S. 368</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(370)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Hitliste tumorhemmender Lebensmittel</span><span class="page-badge">S. 370</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(371)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Vitamine</span><span class="page-badge">S. 371</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(373)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Spurenelemente</span><span class="page-badge">S. 373</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(380)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Konventionelle Krebsbehandlung</span><span class="page-badge">S. 380</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(383)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Biologische Krebstherapie</span><span class="page-badge">S. 383</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(391)"><span>Kreislauf</span><span class="page-badge">S. 391</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(393)"><span>Lachen</span><span class="page-badge">S. 393</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(395)"><span>Leber</span><span class="page-badge">S. 395</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(399)"><span>Lippen</span><span class="page-badge">S. 399</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(401)"><span>Lunge</span><span class="page-badge">S. 401</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(403)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Lungenentzündung</span><span class="page-badge">S. 403</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(403)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Lungenembolie</span><span class="page-badge">S. 403</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(404)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Lungenkrebs</span><span class="page-badge">S. 404</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(405)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Rätselhafte Lungenkrankheiten</span><span class="page-badge">S. 405</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(406)"><span>Lymphe</span><span class="page-badge">S. 406</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(407)"><span>Magen</span><span class="page-badge">S. 407</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(409)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Reizmagen</span><span class="page-badge">S. 409</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(410)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Gastritis</span><span class="page-badge">S. 410</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(412)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Magengeschwür</span><span class="page-badge">S. 412</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(414)"><span>Milch</span><span class="page-badge">S. 414</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(417)"><span>Milz</span><span class="page-badge">S. 417</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(418)"><span>Multiple Sklerose</span><span class="page-badge">S. 418</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(422)"><span>Mund</span><span class="page-badge">S. 422</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(422)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Mundgeruch</span><span class="page-badge">S. 422</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(423)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Mundfäule / Aphthen</span><span class="page-badge">S. 423</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(425)"><span>Muskelkater</span><span class="page-badge">S. 425</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(426)"><span>Nägel</span><span class="page-badge">S. 426</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(426)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nagelgeschwür</span><span class="page-badge">S. 426</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(428)"><span>Narben</span><span class="page-badge">S. 428</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(429)"><span>Nase</span><span class="page-badge">S. 429</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(429)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nasenbluten</span><span class="page-badge">S. 429</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(430)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Verstopfte Nase</span><span class="page-badge">S. 430</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(431)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nebenhöhlenentzündung</span><span class="page-badge">S. 431</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(433)"><span>Nebennieren</span><span class="page-badge">S. 433</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(434)"><span>Nerven</span><span class="page-badge">S. 434</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(436)"><span>Neuralgie</span><span class="page-badge">S. 436</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(438)"><span>Neurodermitis</span><span class="page-badge">S. 438</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(442)"><span>Nieren</span><span class="page-badge">S. 442</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(444)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nieren-Schwäche</span><span class="page-badge">S. 444</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(444)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nieren-Entzündung</span><span class="page-badge">S. 444</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(444)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nierensteine / Grieß</span><span class="page-badge">S. 444</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(446)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nieren-Zysten</span><span class="page-badge">S. 446</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(447)"><span>Ödeme</span><span class="page-badge">S. 447</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(449)"><span>Öle / Fette</span><span class="page-badge">S. 449</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(456)"><span>Ölschlürfen</span><span class="page-badge">S. 456</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(457)"><span>Offenes Bein</span><span class="page-badge">S. 457</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(459)"><span>Ohren</span><span class="page-badge">S. 459</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(459)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Ohrenschmerzen</span><span class="page-badge">S. 459</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(460)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Menièresche Krankheit</span><span class="page-badge">S. 460</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(461)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Tinnitus</span><span class="page-badge">S. 461</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(463)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Schwerhörigkeit</span><span class="page-badge">S. 463</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(463)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Hörsturz</span><span class="page-badge">S. 463</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(463)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Ohrenschmalz</span><span class="page-badge">S. 463</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(465)"><span>Operation</span><span class="page-badge">S. 465</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(468)"><span>Osteoporose</span><span class="page-badge">S. 468</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(474)"><span>Pankreatitis</span><span class="page-badge">S. 474</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(476)"><span>Parkinson</span><span class="page-badge">S. 476</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(480)"><span>Pilze</span><span class="page-badge">S. 480</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(485)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nagel- / Fußpilz</span><span class="page-badge">S. 485</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(487)"><span>Prostata</span><span class="page-badge">S. 487</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(493)"><span>Psoriasis</span><span class="page-badge">S. 493</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(496)"><span>Restless-Legs</span><span class="page-badge">S. 496</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(498)"><span>Rheuma</span><span class="page-badge">S. 498</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(504)"><span>Sodbrennen</span><span class="page-badge">S. 504</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(509)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Selbst-Test</span><span class="page-badge">S. 509</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(510)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Labor-Test</span><span class="page-badge">S. 510</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(510)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Urin-Test</span><span class="page-badge">S. 510</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(513)"><span>Sommersprossen</span><span class="page-badge">S. 513</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(514)"><span>Sonnenbrand</span><span class="page-badge">S. 514</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(516)"><span>Schilddrüse</span><span class="page-badge">S. 516</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(517)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Überfunktion</span><span class="page-badge">S. 517</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(518)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Unterfunktion</span><span class="page-badge">S. 518</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(519)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Hashimoto</span><span class="page-badge">S. 519</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(520)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Knoten in der Schilddrüse</span><span class="page-badge">S. 520</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(520)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nebenschilddrüsen</span><span class="page-badge">S. 520</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(522)"><span>Schlaflosigkeit</span><span class="page-badge">S. 522</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(526)"><span>Schlaganfall</span><span class="page-badge">S. 526</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(532)"><span>Schluckauf</span><span class="page-badge">S. 532</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(534)"><span>Schmerzen</span><span class="page-badge">S. 534</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(540)"><span>Schnarchen</span><span class="page-badge">S. 540</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(541)"><span>Schnupfen</span><span class="page-badge">S. 541</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(543)"><span>Schwindel</span><span class="page-badge">S. 543</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(546)"><span>Schwitzen</span><span class="page-badge">S. 546</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(547)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Nachtschweiß</span><span class="page-badge">S. 547</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(547)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Fußschweiß</span><span class="page-badge">S. 547</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(547)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Achselschweiß</span><span class="page-badge">S. 547</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(549)"><span>Sterilität</span><span class="page-badge">S. 549</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(551)"><span>Stottern</span><span class="page-badge">S. 551</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(552)"><span>Tennisarm</span><span class="page-badge">S. 552</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(554)"><span>Thrombose</span><span class="page-badge">S. 554</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(557)"><span>Übergewicht</span><span class="page-badge">S. 557</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(571)"><span>Venen</span><span class="page-badge">S. 571</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(575)"><span>Vaskulitis</span><span class="page-badge">S. 575</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(576)"><span>Verbrennung</span><span class="page-badge">S. 576</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(578)"><span>Verstauchung / Prellung</span><span class="page-badge">S. 578</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(580)"><span>Verstopfung</span><span class="page-badge">S. 580</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(584)"><span>Vitiligo</span><span class="page-badge">S. 584</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(585)"><span>Wadenkrämpfe</span><span class="page-badge">S. 585</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(587)"><span>Warzen</span><span class="page-badge">S. 587</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(589)"><span>Wasser</span><span class="page-badge">S. 589</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(591)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Heißwasser-Trinkkur</span><span class="page-badge">S. 591</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(593)"><span>Wickel-Auflagen</span><span class="page-badge">S. 593</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(594)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Kalte Wickel</span><span class="page-badge">S. 594</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(596)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Warme Wickel</span><span class="page-badge">S. 596</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(597)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Kopf-Dampfbäder</span><span class="page-badge">S. 597</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(598)"><span>Wunden</span><span class="page-badge">S. 598</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(601)"><span>Zähne</span><span class="page-badge">S. 601</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(601)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Zahnpflege</span><span class="page-badge">S. 601</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(602)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Parodontose</span><span class="page-badge">S. 602</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(603)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Karies</span><span class="page-badge">S. 603</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(604)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Zahnschmerzen</span><span class="page-badge">S. 604</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(605)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Zahnstein</span><span class="page-badge">S. 605</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(605)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Speichelsteine</span><span class="page-badge">S. 605</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(605)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Zahnfleischbluten</span><span class="page-badge">S. 605</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(605)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Zähneknirschen</span><span class="page-badge">S. 605</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(606)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Amalgam</span><span class="page-badge">S. 606</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(611)"><span>Zecken</span><span class="page-badge">S. 611</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(612)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Borreliose</span><span class="page-badge">S. 612</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(614)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Frühsommer-Meningoenzephalitis (FSME)</span><span class="page-badge">S. 614</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(615)"><span>&nbsp;&nbsp;&nbsp;&nbsp;Zeckenbissfieber</span><span class="page-badge">S. 615</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(617)"><span>Zellulitis</span><span class="page-badge">S. 617</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(619)"><span>Zöliakie</span><span class="page-badge">S. 619</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(621)"><span>Zunge</span><span class="page-badge">S. 621</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(624)"><span>Zwerchfellbruch</span><span class="page-badge">S. 624</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(625)"><span>Richtige Ernährung</span><span class="page-badge">S. 625</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(633)"><span>Literaturverzeichnis</span><span class="page-badge">S. 633</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(643)"><span>Zeitschriften</span><span class="page-badge">S. 643</span></a></li>
+                <li class="toc-item"><a class="toc-link" onclick="goToPage(645)"><span>Bezugsquellen</span><span class="page-badge">S. 645</span></a></li>
+                </ul>
+            </div>
+
+            <div style="margin-top: auto; border-top: 1px solid #e1e4e8; padding-top: 15px;">
+                <h2>Alternative Formate</h2>
+                <ul class="sidebar-links">
+                    <li><a href="docs/NHK2026.pdf?download=1">📄 PDF-Dokument herunterladen (.pdf)</a></li>
+                    <li><a href="docs/NHK.epub?download=1">📱 eBook-Dokument herunterladen (.epub)</a></li>
+                    <li><a href="https://github.com" target="_blank">💻 Repository Quellcode</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Document Viewer Body Frame -->
+        <iframe id="pdfViewer" src="docs/NHK2026.pdf"></iframe>
+    </div>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const tocSearch = document.getElementById('tocSearch');
+        const tocItems = document.getElementsByClassName('toc-item');
+
+        // Core Base PDF Target URL
+        const pdfBaseUrl = "docs/NHK2026.pdf";
+
+        // Navigation Engine: Jumps canvas viewport seamlessly to desired PDF page offset
+        function goToPage(pageNumber) {
+            pdfViewer.src = pdfBaseUrl + "#page=" + pageNumber;
+            
+            // On mobile layouts, close the drawer automatically after tapping a section
+            if (window.innerWidth <= 600) {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        // Live Filtering Logic Snippet
+        tocSearch.addEventListener('keyup', function() {
+            const filterValue = tocSearch.value.toLowerCase();
+            
+            for (let i = 0; i < tocItems.length; i++) {
+                const itemText = tocItems[i].textContent || tocItems[i].innerText;
+                if (itemText.toLowerCase().indexOf(filterValue) > -1) {
+                    tocItems[i].style.display = "";
+                } else {
+                    tocItems[i].style.display = "none";
+                }
+            }
+        });
+
+        // Sidebar Sliding Mechanics Controls
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
