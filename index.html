@@ -682,18 +682,21 @@ document.addEventListener('touchstart', closeUI, { passive: true });
 
 // 3. Touch Handling Optimization for Mobile Table of Contents Links
 const allTocLinks = document.querySelectorAll('.toc-link');
-allTocLinks.forEach(link => {
-    link.addEventListener('touchstart', function(e) {
-        const onClickAttr = this.getAttribute('onclick');
-        if (onClickAttr) {
-            const pageMatch = onClickAttr.match(/\d+/);
-            if (pageMatch) {
-                e.preventDefault();
-                goToPage(parseInt(pageMatch, 10));
+if (allTocLinks) {
+    allTocLinks.forEach(link => {
+        link.addEventListener('touchstart', function(e) {
+            const onClickAttr = this.getAttribute('onclick');
+            if (onClickAttr) {
+                const pageMatch = onClickAttr.match(/\d+/);
+                if (pageMatch) {
+                    e.preventDefault();
+                    goToPage(parseInt(pageMatch, 10));
+                }
             }
-        }
-    }, { passive: false });
-});
+        }, { passive: false });
+    });
+}
+
 
 </script>
 </body>
