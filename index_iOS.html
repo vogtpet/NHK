@@ -626,17 +626,6 @@
             }
         });
 
-        // Sidebar Sliding Mechanics Controls
-        menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sidebar.classList.toggle('active');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!sidebar.contains(e.target) && e.target !== menuToggle) {
-                sidebar.classList.remove('active');
-            }
-        });
 
 // Sidebar Sliding Mechanics Controls
 menuToggle.addEventListener('click', (e) => {
