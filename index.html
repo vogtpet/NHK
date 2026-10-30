@@ -587,9 +587,8 @@
         const tocSearch = document.getElementById('tocSearch');
         const tocItems = document.getElementsByClassName('toc-item');
 
-        // Core Base PDF Target URL: was const pdfBaseUrl = "docs/NHK2026.pdf";
-        const pdfBaseUrl = "https://google.com" + encodeURIComponent(window.location.origin + window.location.pathname + "docs/NHK2026.pdf") + "&embedded=true";
-
+        // Core Base PDF Target URL
+        const pdfBaseUrl = "docs/NHK2026.pdf";
         
 
 function goToPage(pageNumber) {
@@ -605,18 +604,23 @@ function goToPage(pageNumber) {
         document.body.appendChild(safeLink);
         safeLink.click();
         document.body.removeChild(safeLink);
-} else {
-    const viewer = document.getElementById('pdfViewer');
-    if (viewer && viewer.contentWindow) {
-        try {
-            // Directly update the iframe's inner location context
-            viewer.contentWindow.location.replace(pdfBaseUrl + "#page=" + pageNumber);
-        } catch (e) {
-            // Fallback safely if cross-origin flags trigger (though rare on same-domain GitHub Pages)
+    } else {
+        // Fast, high-performance native rendering for Desktop & Android layouts
+        const viewer = document.getElementById('pdfViewer');
+        if (viewer) {
             viewer.src = pdfBaseUrl + "#page=" + pageNumber;
         }
     }
+
+    // Automatically dismiss the nav overlay menu drawer on mobile layouts
+    const sidebarEl = document.getElementById('sidebar');
+    if (window.innerWidth <= 600 && sidebarEl) {
+        sidebarEl.classList.remove('active');
+    }
 }
+
+
+
 
 
 
