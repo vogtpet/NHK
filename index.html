@@ -592,22 +592,27 @@
         
         
         function goToPage(pageNumber) {
-    // Check if the user is using an iPhone, iPad, or iPod
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    // Advanced iOS environment and iPad check
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || 
+                  (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
     if (isIOS) {
-        // iOS Fix: Instead of breaking inside the iframe, open the exact page in a clean new tab
+        // Safe tab fallback bypass for mobile Safari iframe flattening behavior
         window.open(pdfBaseUrl + "#page=" + pageNumber, '_blank');
     } else {
-        // Desktop / Android: Keep using the fast internal reader layout
-        pdfViewer.src = pdfBaseUrl + "#page=" + pageNumber;
+        // Fast layout loading for Desktop & Android environments
+        if (pdfViewer) {
+            pdfViewer.src = pdfBaseUrl + "#page=" + pageNumber;
+        }
     }
 
-    // On mobile layouts, close the drawer automatically after tapping a section
-    if (window.innerWidth <= 600) {
+    // Automatically dismiss the nav overlay menu drawer on mobile layouts
+    if (window.innerWidth <= 600 && sidebar) {
         sidebar.classList.remove('active');
     }
 }
+
+
 
 
         // Live Filtering Logic Snippet
@@ -624,36 +629,29 @@
             }
         });
 
-        // Sidebar Sliding Mechanics Controls
-        menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sidebar.classList.toggle('active');
-        });
+// ============================================================
+// UNIFIED INTERACTIVE INTERFACE NAVIGATION CONTROLS
+// ============================================================
 
-        document.addEventListener('click', (e) => {
-            if (!sidebar.contains(e.target) && e.target !== menuToggle) {
-                sidebar.classList.remove('active');
-            }
-        });
-
-// Sidebar Sliding Mechanics Controls
-menuToggle.addEventListener('click', (e) => {
+// 1. Unified Sidebar Drawer Toggle Action
+const toggleUI = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     sidebar.classList.toggle('active');
-});
+};
+menuToggle.addEventListener('click', toggleUI);
+menuToggle.addEventListener('touchstart', toggleUI, { passive: false });
 
-document.addEventListener('click', (e) => {
+// 2. Unified Dismiss Layer Action (Clicking Outside Sidebar Closes It)
+const closeUI = (e) => {
     if (!sidebar.contains(e.target) && e.target !== menuToggle) {
         sidebar.classList.remove('active');
     }
-});
+};
+document.addEventListener('click', closeUI);
+document.addEventListener('touchstart', closeUI, { passive: true });
 
-
-// ============================================================
-// PASTE THE NEW COOPERATIVE IOS EVENT FIXED CODE DOWN HERE:
-// ============================================================
-
-// 1. Add touchstart event listeners to all Table of Contents links
+// 3. Touch Handling Optimization for Mobile Table of Contents Links
 const allTocLinks = document.querySelectorAll('.toc-link');
 allTocLinks.forEach(link => {
     link.addEventListener('touchstart', function(e) {
@@ -668,27 +666,6 @@ allTocLinks.forEach(link => {
     }, { passive: false });
 });
 
-// 2. Fix the Mobile Sidebar Toggle for iOS Safari Touch Events
-const originalMenuToggle = document.getElementById('menuToggle');
-if (originalMenuToggle) {
-    originalMenuToggle.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        document.getElementById('sidebar').classList.toggle('active');
-    }, { passive: false });
-}
-
-// 3. Fix clicking outside the sidebar to close it on mobile
-document.addEventListener('touchstart', function(e) {
-    const sidebarEl = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('menuToggle');
-    if (sidebarEl && sidebarEl.classList.contains('active')) {
-        if (!sidebarEl.contains(e.target) && e.target !== toggleBtn) {
-            sidebarEl.classList.remove('active');
-        }
-    }
-});
-
-    </script>
+</script>
 </body>
 </html>
