@@ -591,14 +591,15 @@
         const pdfBaseUrl = "docs/NHK2026.pdf";
         
         
-        function goToPage(pageNumber) {
+function goToPage(pageNumber) {
     // Advanced iOS environment and iPad check
     const isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || 
                   (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
     if (isIOS) {
-    // Renders the PDF directly inside your layout using Mozilla's viewer, keeping the Menu visible!
-      pdfViewer.src = "https://github.io" + encodeURIComponent(window.location.origin + "/" + pdfBaseUrl) + "#page=" + pageNumber;
+        // Safe Google Docs web viewer proxy stream: Bypasses iOS iframe bugs and keeps layout intact!
+        const fullPdfUrl = window.location.origin + "/" + pdfBaseUrl;
+        pdfViewer.src = "https://google.com" + encodeURIComponent(fullPdfUrl) + "&embedded=true#page=" + pageNumber;
     } else {
         // Fast layout loading for Desktop & Android environments
         if (pdfViewer) {
@@ -611,6 +612,7 @@
         sidebar.classList.remove('active');
     }
 }
+
 
 
 
