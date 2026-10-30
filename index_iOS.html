@@ -592,22 +592,24 @@
         
         
         function goToPage(pageNumber) {
-    // Check if the user is using an iPhone, iPad, or iPod
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || 
+                  (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
     if (isIOS) {
-        // iOS Fix: Instead of breaking inside the iframe, open the exact page in a clean new tab
         window.open(pdfBaseUrl + "#page=" + pageNumber, '_blank');
     } else {
-        // Desktop / Android: Keep using the fast internal reader layout
-        pdfViewer.src = pdfBaseUrl + "#page=" + pageNumber;
+        const viewer = document.getElementById('pdfViewer');
+        if (viewer) {
+            viewer.src = pdfBaseUrl + "#page=" + pageNumber;
+        }
     }
 
-    // On mobile layouts, close the drawer automatically after tapping a section
-    if (window.innerWidth <= 600) {
-        sidebar.classList.remove('active');
+    const sidebarEl = document.getElementById('sidebar');
+    if (sidebarEl) {
+        sidebarEl.classList.remove('active');
     }
 }
+
 
 
         // Live Filtering Logic Snippet
