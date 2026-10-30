@@ -605,13 +605,15 @@ function goToPage(pageNumber) {
         safeLink.click();
         document.body.removeChild(safeLink);
 } else {
-    // Fast, high-performance native rendering for Desktop & Android layouts
     const viewer = document.getElementById('pdfViewer');
-    if (viewer) {
-        // Clone the node, update the source, and completely replace it in the DOM
-        const clone = viewer.cloneNode(true);
-        clone.src = pdfBaseUrl + "#page=" + pageNumber;
-        viewer.parentNode.replaceChild(clone, viewer);
+    if (viewer && viewer.contentWindow) {
+        try {
+            // Directly update the iframe's inner location context
+            viewer.contentWindow.location.replace(pdfBaseUrl + "#page=" + pageNumber);
+        } catch (e) {
+            // Fallback safely if cross-origin flags trigger (though rare on same-domain GitHub Pages)
+            viewer.src = pdfBaseUrl + "#page=" + pageNumber;
+        }
     }
 }
 
