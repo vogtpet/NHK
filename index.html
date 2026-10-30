@@ -590,18 +590,17 @@
         // Core Base PDF Target URL
         const pdfBaseUrl = "docs/NHK2026.pdf";
         
-        
 function goToPage(pageNumber) {
     // Advanced iOS environment and iPad check
     const isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || 
                   (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
     if (isIOS) {
-        // Ultimate single-page fix for iOS Safari: Change the frame src to a standard object parameter
-        const targetUrl = pdfBaseUrl + "#page=" + pageNumber;
-        pdfViewer.src = targetUrl;
+        // Safe, single-page cloud deployment of PDF.js that permits external CORS documents
+        const fullPdfUrl = window.location.origin + "/" + pdfBaseUrl;
+        pdfViewer.src = "https://onrender.com" + encodeURIComponent(fullPdfUrl) + "#page=" + pageNumber;
     } else {
-        // Fast layout loading for Desktop & Android environments
+        // Fast, high-performance native rendering for Desktop & Android
         if (pdfViewer) {
             pdfViewer.src = pdfBaseUrl + "#page=" + pageNumber;
         }
