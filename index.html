@@ -587,8 +587,9 @@
         const tocSearch = document.getElementById('tocSearch');
         const tocItems = document.getElementsByClassName('toc-item');
 
-        // Core Base PDF Target URL
-        const pdfBaseUrl = "docs/NHK2026.pdf";
+        // Core Base PDF Target URL: was const pdfBaseUrl = "docs/NHK2026.pdf";
+        const pdfBaseUrl = "https://google.com" + encodeURIComponent(window.location.origin + window.location.pathname + "docs/NHK2026.pdf") + "&embedded=true";
+
         
 
 function goToPage(pageNumber) {
