@@ -608,10 +608,13 @@ function goToPage(pageNumber) {
     // Fast, high-performance native rendering for Desktop & Android layouts
     const viewer = document.getElementById('pdfViewer');
     if (viewer) {
-        // Adding a unique timestamp query parameter forces Chrome to re-evaluate the source change
-        viewer.src = pdfBaseUrl + "?t=" + Date.now() + "#page=" + pageNumber;
+        // Clone the node, update the source, and completely replace it in the DOM
+        const clone = viewer.cloneNode(true);
+        clone.src = pdfBaseUrl + "#page=" + pageNumber;
+        viewer.parentNode.replaceChild(clone, viewer);
     }
 }
+
 
 
         // Live Filtering Logic Snippet
