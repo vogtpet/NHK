@@ -591,14 +591,14 @@
         const pdfBaseUrl = "docs/NHK2026.pdf";
         
 document.addEventListener("DOMContentLoaded", function() {
-    // Detect all Chromium-based engines (Chrome, Edge, Opera) globally
-    const isChromium = !!window.chrome || (navigator.userAgent.indexOf("Chrome") > -1);
+    // 1. Detect if the reader is using an Android device
+    const isAndroid = /Android/i.test(navigator.userAgent);
     
-    // Fallback security check to make sure mobile/tablet layouts don't get hidden accidentally
+    // 2. Existing Chromium desktop hiding logic
+    const isChromium = !!window.chrome || (navigator.userAgent.indexOf("Chrome") > -1);
     const isMobileLayout = window.innerWidth <= 600;
     
     if (isChromium && !isMobileLayout) {
-        // Elements are fetched inside the listener so they exist safely
         const sidebarEl = document.getElementById('sidebar');
         const toggleEl = document.getElementById('menuToggle');
         const noticeEl = document.getElementById('mobileNotice');
@@ -608,6 +608,16 @@ document.addEventListener("DOMContentLoaded", function() {
         if (toggleEl) toggleEl.style.display = 'none';
         if (noticeEl) noticeEl.style.display = 'none';
         if (iframeEl) iframeEl.style.width = '100%';
+    }
+    
+    // 3. FORCE ANDROID COMPATIBILITY
+    if (isAndroid) {
+        const iframeEl = document.getElementById('pdfViewer');
+        if (iframeEl) {
+            // Re-route the target URL through Google's mobile web document viewer
+            const fullBookUrl = window.location.origin + window.location.pathname + pdfBaseUrl;
+            iframeEl.src = "https://google.com" + encodeURIComponent(fullBookUrl) + "&embedded=true";
+        }
     }
 });
 
