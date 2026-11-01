@@ -13,7 +13,7 @@ jobs:
   backup-traffic:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checked out using v4 (Updated runner handles node tags cleanly)
+      # Step 1: Check out your repository code
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -23,7 +23,7 @@ jobs:
         env:
           TRAFFIC_ACTION_TOKEN: ${{ secrets.TRAFFIC_ACTION_TOKEN }}
 
-      # Step 3: Upgraded from v9 to v10 to natively target newer Node versions
+      # Step 3: Commit and safely push using rebase to avoid sync conflicts
       - name: Commit and Push Changes
         uses: EndBug/add-and-commit@v10
         with:
@@ -31,3 +31,4 @@ jobs:
           author_email: "actions@github.com"
           message: "Daily traffic data backup [skip ci]"
           add: "traffic/"
+          pull: "--rebase --autostash" # Forces the runner to sync before pushing
