@@ -1,44 +1,71 @@
-name: Save Repo Traffic History
+name: Traffic Backup and Website Counter
 
 on:
   schedule:
-    - cron: "0 0 * * *"
-  workflow_dispatch:
-
-permissions:
-  contents: write
+    - cron: '0 0 * * *' # Runs daily at midnight
+  workflow_dispatch: # Allows manual trigger testing inside Actions tab
 
 jobs:
-  backup-traffic:
+  backup:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
 
-      # This action generates the CSV files inside a local 'traffic' folder
-      - name: Fetch Repository Traffic
-        uses: sangonzal/repository-traffic-action@v.0.1.6
-        env:
-          TRAFFIC_ACTION_TOKEN: ${{ secrets.TRAFFIC_ACTION_TOKEN }}
+      # --- KEEP EXISTING REPO TRAFFIC CONFIGURATION ---
+      # Ensure your original repository-traffic-action steps run here
+      # ------------------------------------------------
 
-      # We handle the commit and push explicitly using native git tools
-      - name: Sync and Push Traffic Data
+      # --- NEW WEB VISITOR COUNTER EXTRACTION LOGIC ---
+      - name: Fetch Website Visitor Counter
+        run: |
+          mkdir -p traffic
+          TODAY=$(date +%Y-%m-%d)
+          
+          # Fetch SVG data via curl on GitHub's open network node
+          SVG_DATA=$(curl -s --max-time 15 "https://glitch.me" || echo "")
+          
+          # Extract numerical digits using regex parsing safely
+          LIVE_COUNT=$(echo "$SVG_DATA" | grep -o '[0-9]\+' | tr -d '\n' || echo "")
+          
+          if [ -z "$LIVE_COUNT" ]; then
+            echo "Warning: Live counter endpoint unreachable or sleeping. Bypassing entry update."
+            exit 0
+          fi
+          
+          CSV_FILE="traffic/site_traffic.csv"
+          
+          # Initialize data log structure if missing
+          if [ ! -f "$CSV_FILE" ]; then
+            echo "Date,DailyViews,LiveTotal" > "$CSV_FILE"
+          fi
+          
+          # Process historical intervals to build daily delta counts
+          if grep -q "$TODAY" "$CSV_FILE"; then
+            # Update today's rows if run multiple times within same date cycle
+            SED_ESC_DATE=$(echo "$TODAY" | sed 's/-/\\-/g')
+            PREV_TOTAL=$(tail -n 2 "$CSV_FILE" | head -n 1 | cut -d',' -f3)
+            if [ -z "$PREV_TOTAL" ] || [ "$PREV_TOTAL" = "LiveTotal" ]; then PREV_TOTAL=$((LIVE_COUNT - 1)); fi
+            DAILY_VIEWS=$((LIVE_COUNT - PREV_TOTAL))
+            if [ $DAILY_VIEWS -lt 0 ]; then DAILY_VIEWS=0; fi
+            
+            sed -i "/^$SED_ESC_DATE/d" "$CSV_FILE"
+            echo "$TODAY,$DAILY_VIEWS,$LIVE_COUNT" >> "$CSV_FILE"
+          else
+            # Append completely new record entry for the calendar period
+            LAST_TOTAL=$(tail -n 1 "$CSV_FILE" | cut -d',' -f3)
+            if [ -z "$LAST_TOTAL" ] || [ "$LAST_TOTAL" = "LiveTotal" ]; then LAST_TOTAL=$LIVE_COUNT; fi
+            DAILY_VIEWS=$((LIVE_COUNT - LAST_TOTAL))
+            if [ $DAILY_VIEWS -lt 0 ]; then DAILY_VIEWS=0; fi
+            
+            echo "$TODAY,$DAILY_VIEWS,$LIVE_COUNT" >> "$CSV_FILE"
+          fi
+
+      # --- UPDATE AUTOMATED PUSH LAYER ---
+      - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          # Force sync any remote updates made while this job ran
-          git fetch origin main
-          git reset --soft origin/main
-          
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add traffic/
-          
-          if ! git diff --cached --quiet; then
-            git commit -m "Daily traffic data backup [skip ci]"
-            git push origin main
-          else
-            echo "No new changes detected."
-          fi
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update repository traffic and site counter log entries"
+          git push
