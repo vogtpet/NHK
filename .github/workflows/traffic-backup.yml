@@ -2,9 +2,8 @@ name: Save Repo Traffic History
 
 on:
   schedule:
-    # Runs automatically every day at midnight UTC
     - cron: "0 0 * * *"
-  workflow_dispatch: # Allows you to manually trigger it anytime
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,35 +12,33 @@ jobs:
   backup-traffic:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Clean checkout with full branch history
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
-      # Step 2: Fetch traffic data and compile it to CSV
+      # This action generates the CSV files inside a local 'traffic' folder
       - name: Fetch Repository Traffic
         uses: sangonzal/repository-traffic-action@v.0.1.6
         env:
           TRAFFIC_ACTION_TOKEN: ${{ secrets.TRAFFIC_ACTION_TOKEN }}
 
-      # Step 3: Explicitly sync, add files, and force clean push using native git
+      # We handle the commit and push explicitly using native git tools
       - name: Sync and Push Traffic Data
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
-          # Fetch remote and rebase any external changes
+          # Force sync any remote updates made while this job ran
           git fetch origin main
-          git pull origin main --rebase --autostash
+          git reset --soft origin/main
           
-          # Stage the generated traffic data files 
           git add traffic/
           
-          # Only commit and push if data files actually changed
           if ! git diff --cached --quiet; then
             git commit -m "Daily traffic data backup [skip ci]"
             git push origin main
           else
-            echo "No new traffic data modifications to commit today."
+            echo "No new changes detected."
           fi
