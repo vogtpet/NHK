@@ -13,7 +13,7 @@ jobs:
   backup-traffic:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Check out the entire repository history cleanly
+      # Step 1: Clean checkout with full branch history
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
@@ -25,18 +25,23 @@ jobs:
         env:
           TRAFFIC_ACTION_TOKEN: ${{ secrets.TRAFFIC_ACTION_TOKEN }}
 
-      # Step 3: Explicitly pull and merge any remote changes before committing
-      - name: Sync Branch State
+      # Step 3: Explicitly sync, add files, and force clean push using native git
+      - name: Sync and Push Traffic Data
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "actions@github.com"
-          git pull origin main --rebase
-
-      # Step 4: Commit and push changes safely
-      - name: Commit and Push Changes
-        uses: EndBug/add-and-commit@v10
-        with:
-          author_name: "GitHub Action"
-          author_email: "actions@github.com"
-          message: "Daily traffic data backup [skip ci]"
-          add: "traffic/"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Fetch remote and rebase any external changes
+          git fetch origin main
+          git pull origin main --rebase --autostash
+          
+          # Stage the generated traffic data files 
+          git add traffic/
+          
+          # Only commit and push if data files actually changed
+          if ! git diff --cached --quiet; then
+            git commit -m "Daily traffic data backup [skip ci]"
+            git push origin main
+          else
+            echo "No new traffic data modifications to commit today."
+          fi
