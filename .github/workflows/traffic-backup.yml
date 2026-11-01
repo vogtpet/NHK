@@ -13,9 +13,11 @@ jobs:
   backup-traffic:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Check out your repository code
+      # Step 1: Check out the entire repository history cleanly
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # Step 2: Fetch traffic data and compile it to CSV
       - name: Fetch Repository Traffic
@@ -23,7 +25,14 @@ jobs:
         env:
           TRAFFIC_ACTION_TOKEN: ${{ secrets.TRAFFIC_ACTION_TOKEN }}
 
-      # Step 3: Commit and safely push using rebase to avoid sync conflicts
+      # Step 3: Explicitly pull and merge any remote changes before committing
+      - name: Sync Branch State
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "actions@github.com"
+          git pull origin main --rebase
+
+      # Step 4: Commit and push changes safely
       - name: Commit and Push Changes
         uses: EndBug/add-and-commit@v10
         with:
@@ -31,4 +40,3 @@ jobs:
           author_email: "actions@github.com"
           message: "Daily traffic data backup [skip ci]"
           add: "traffic/"
-          pull: "--rebase --autostash" # Forces the runner to sync before pushing
