@@ -22,7 +22,7 @@ jobs:
           CSV_FILE="traffic/site_traffic.csv"
           
           echo "=== DEBUG: FETCHING DATA ==="
-          SVG_DATA=$(curl -s -L --max-time 15 "https://glitch.me")
+          SVG_DATA=$(curl -s -L --max-time 15 "https://profile-counter.glitch.me/vogtpet-nhk-site/count.svg")
           
           echo "DEBUG: RAW SVG OUTPUT START"
           echo "$SVG_DATA"
@@ -61,7 +61,8 @@ jobs:
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@://github.com"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
           git add traffic/
           git diff --quiet && git diff --staged --quiet || git commit -m "Update repository traffic and site counter log entries"
           git push
