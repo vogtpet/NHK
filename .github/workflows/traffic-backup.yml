@@ -6,7 +6,6 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch: # Allows you to manually trigger it anytime
 
-# Add this block to give the runner explicit write access
 permissions:
   contents: write
 
@@ -14,7 +13,7 @@ jobs:
   backup-traffic:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Check out your repository code
+      # Step 1: Checked out using v4 (Updated runner handles node tags cleanly)
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -24,12 +23,11 @@ jobs:
         env:
           TRAFFIC_ACTION_TOKEN: ${{ secrets.TRAFFIC_ACTION_TOKEN }}
 
-      # Step 3: Commit the new CSV data back into the repository
+      # Step 3: Upgraded from v9 to v10 to natively target newer Node versions
       - name: Commit and Push Changes
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           author_name: "GitHub Action"
           author_email: "actions@github.com"
           message: "Daily traffic data backup [skip ci]"
-          add: "traffic/" # The action automatically puts CSV files in a 'traffic' folder
-
+          add: "traffic/"
