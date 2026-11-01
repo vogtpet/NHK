@@ -1,0 +1,30 @@
+name: Save Repo Traffic History
+
+on:
+  schedule:
+    # Runs automatically every day at midnight UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch: # Allows you to manually trigger it anytime
+
+jobs:
+  backup-traffic:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Check out your repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Fetch traffic data and compile it to CSV
+      - name: Fetch Repository Traffic
+        uses: sangonzal/repository-traffic-action@v.0.1.6
+        env:
+          TRAFFIC_ACTION_TOKEN: ${{ secrets.TRAFFIC_ACTION_TOKEN }}
+
+      # Step 3: Commit the new CSV data back into the repository
+      - name: Commit and Push Changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: "GitHub Action"
+          author_email: "actions@github.com"
+          message: "Daily traffic data backup [skip ci]"
+          add: "traffic/" # The action automatically puts CSV files in a 'traffic' folder
