@@ -15,10 +15,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # --- KEEP EXISTING REPO TRAFFIC CONFIGURATION ---
-      # Ensure your original repository-traffic-action steps run here
-      # ------------------------------------------------
-
       # --- NEW WEB VISITOR COUNTER EXTRACTION LOGIC ---
       - name: Fetch Website Visitor Counter
         run: |
@@ -28,11 +24,21 @@ jobs:
           # Fetch SVG data via curl on GitHub's open network node
           SVG_DATA=$(curl -s --max-time 15 "https://glitch.me" || echo "")
           
-          # Extract numerical digits using regex parsing safely
-          LIVE_COUNT=$(echo "$SVG_DATA" | grep -o '[0-9]\+' | tr -d '\n' || echo "")
+          # Extract numerical digits strictly from the content body text rather than layout dimensions
+          LIVE_COUNT=$(echo "$SVG_DATA" | grep -oE '<text[^>]*>[0-9]+</text>' | grep -oE '[0-9]+' | head -n 1 || echo "")
           
+          # Fallback extraction if text format differs slightly
           if [ -z "$LIVE_COUNT" ]; then
-            echo "Warning: Live counter endpoint unreachable or sleeping. Bypassing entry update."
+            LIVE_COUNT=$(echo "$SVG_DATA" | grep -oE 'id="count"[^>]*>[0-9]+' | grep -oE '[0-9]+' || echo "")
+          fi
+          
+          # Ultimate fallback: strip anything that isn't a digit if it's a short clean file
+          if [ -z "$LIVE_COUNT" ]; then
+            LIVE_COUNT=$(echo "$SVG_DATA" | tr -cd '0-9' | sed 's/^0*//' || echo "")
+          fi
+
+          if [ -z "$LIVE_COUNT" ]; then
+            echo "Warning: Live counter endpoint unreachable or format unparseable. Bypassing entry update."
             exit 0
           fi
           
@@ -58,17 +64,19 @@ jobs:
             # Append completely new record entry for the calendar period
             LAST_TOTAL=$(tail -n 1 "$CSV_FILE" | cut -d',' -f3)
             if [ -z "$LAST_TOTAL" ] || [ "$LAST_TOTAL" = "LiveTotal" ]; then LAST_TOTAL=$LIVE_COUNT; fi
-            DAILY_VIEWS=$((LIVE_COUNT - LAST_TOTAL))
+            DAILY_VIEWS=$((LIVE_COUNT - last_total))
             if [ $DAILY_VIEWS -lt 0 ]; then DAILY_VIEWS=0; fi
             
             echo "$TODAY,$DAILY_VIEWS,$LIVE_COUNT" >> "$CSV_FILE"
           fi
+          
+          echo "Successfully collected traffic view total: $LIVE_COUNT"
 
       # --- UPDATE AUTOMATED PUSH LAYER ---
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.email "github-actions[bot]@://github.com"
           git add traffic/
           git diff --quiet && git diff --staged --quiet || git commit -m "Update repository traffic and site counter log entries"
           git push
