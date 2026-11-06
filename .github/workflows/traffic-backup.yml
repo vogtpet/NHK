@@ -21,37 +21,37 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           CSV_FILE="traffic/site_traffic.csv"
           
-          echo "=== RUNNING PYTHON TARGETED FETCH ==="
+          echo "=== RUNNING PYTHON SECRET TARGETED FETCH ==="
           python3 -c '
           import urllib.request
+          import os
           import re
           
-          # Using the exact API subdomain route that generates your image
-          full_url = "https://visitorbadge.io"
+          # Read the raw, completely hidden URL directly out of runner memory
+          full_url = os.environ.get("PROTECTED_URL", "")
           
           try:
               req = urllib.request.Request(full_url, headers={"User-Agent": "Mozilla/5.0"})
               with urllib.request.urlopen(req) as response:
                   svg_data = response.read().decode("utf-8")
               
-              # Pull content specifically out of the second/last text element matching the view total
+              # Extract contents of the text tags safely
               matches = re.findall(r"<text[^>]*>(.*?)</text>", svg_data)
               if matches:
-                  # Filter out formatting characters to leave raw integer digits
                   count = "".join(filter(str.isdigit, matches[-1]))
                   if count:
                       print(f"EXTRACTED_NUMBER_FOUND:{count}")
                   else:
-                      print("ERROR: No numerical digits present in text tags.")
+                      print("ERROR: Clean parsing yielded no digits in text tags.")
               else:
-                  print("ERROR: No text elements matched in response markup.")
+                  print("ERROR: Response content contains no text tags.")
           except Exception as e:
-              print(f"ERROR: Fetch routine aborted: {e}")
+              print(f"ERROR: Fetch engine routine failed: {e}")
           ' > python_output.txt
 
           cat python_output.txt
           
-          # Extract the safe, cleaned count number from the log file
+          # Extract clean metric count from the log file
           LIVE_COUNT=$(grep "EXTRACTED_NUMBER_FOUND:" python_output.txt | cut -d':' -f2)
           rm python_output.txt
           
@@ -80,6 +80,8 @@ jobs:
           
           echo "$TODAY,$DAILY_VIEWS,$LIVE_COUNT" >> "$CSV_FILE"
           echo "=== SUCCESS: CSV UPDATED ==="
+        env:
+          PROTECTED_URL: ${{ secrets.COUNTER_URL }}
 
       - name: Commit and Push Changes
         run: |
