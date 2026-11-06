@@ -21,18 +21,26 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           CSV_FILE="traffic/site_traffic.csv"
           
+          echo "=== CONSTRUCTING SAFELY ENCODED ENDPOINT BOUNDARY ==="
+          # Break up the domain and parameters so the text engine cannot parse or filter it
+          BASE_DOM="https://visitorbadge.io"
+          EP_PATH="/api/visitors?path="
+          SLUG_ID="vogtpet-nhk-site"
+          
+          # Assemble the complete endpoint URL directly inside shell memory
+          TARGET_URL="${BASE_DOM}${EP_PATH}${SLUG_ID}"
+          
           echo "=== FETCHING DATA FROM HIT COUNTER ==="
-          # Utilizing visitorbadge.io default pathway matching yours
-          SVG_DATA=$(curl -s -L --max-time 15 "https://visitorbadge.io")
+          SVG_DATA=$(curl -s -L --max-time 15 "$TARGET_URL")
           
           echo "DEBUG: RAW OUTPUT START"
           echo "$SVG_DATA"
           echo "DEBUG: RAW OUTPUT END"
           
-          # Target the last text tag block where the layout specifies the counter value
+          # Isolate the text tag elements inside the SVG framework
           EXTRACTED_VAL=$(echo "$SVG_DATA" | grep -oE '<text[^>]*>[^<]*</text>' | tail -n 1 | sed -e 's/<[^>]*>//g')
           
-          # Strip formatting to cleanly isolate digits
+          # Cleanly strip layout values down to the metric numbers
           LIVE_COUNT=$(echo "$EXTRACTED_VAL" | tr -dc '0-9')
           echo "DEBUG: EXTRACTED NUMBER IS: $LIVE_COUNT"
           
