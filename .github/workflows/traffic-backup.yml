@@ -21,37 +21,37 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           CSV_FILE="traffic/site_traffic.csv"
           
-          echo "=== RUNNING PYTHON SECURE FETCH ==="
+          echo "=== RUNNING PYTHON TARGETED FETCH ==="
           python3 -c '
           import urllib.request
           import re
           
-          # Constructing the exact, untruncated URL step by step safely in memory
-          domain = "https://visitorbadge.io"
-          endpoint = "/api/visitors"
-          query = "?path=vogtpet-nhk-site"
-          full_url = domain + endpoint + query
+          # Using the exact API subdomain route that generates your image
+          full_url = "https://visitorbadge.io"
           
           try:
               req = urllib.request.Request(full_url, headers={"User-Agent": "Mozilla/5.0"})
               with urllib.request.urlopen(req) as response:
                   svg_data = response.read().decode("utf-8")
               
-              # Find the exact text element count value inside the SVG tags
+              # Pull content specifically out of the second/last text element matching the view total
               matches = re.findall(r"<text[^>]*>(.*?)</text>", svg_data)
               if matches:
-                  # Clear out any commas or formatting to leave only raw digits
+                  # Filter out formatting characters to leave raw integer digits
                   count = "".join(filter(str.isdigit, matches[-1]))
-                  print(f"EXTRACTED_NUMBER_FOUND:{count}")
+                  if count:
+                      print(f"EXTRACTED_NUMBER_FOUND:{count}")
+                  else:
+                      print("ERROR: No numerical digits present in text tags.")
               else:
-                  print("ERROR: No text tags found inside the image framework.")
+                  print("ERROR: No text elements matched in response markup.")
           except Exception as e:
-              print(f"ERROR: Network fetch failed: {e}")
+              print(f"ERROR: Fetch routine aborted: {e}")
           ' > python_output.txt
 
           cat python_output.txt
           
-          # Isolate the extracted count value from the script log output
+          # Extract the safe, cleaned count number from the log file
           LIVE_COUNT=$(grep "EXTRACTED_NUMBER_FOUND:" python_output.txt | cut -d':' -f2)
           rm python_output.txt
           
