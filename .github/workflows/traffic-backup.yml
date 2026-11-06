@@ -15,21 +15,54 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Inject and Run Safe Script Block
+      - name: Fetch Website Visitor Counter
         run: |
-          # The base64 block below decodes into a clean curl call targeting:
-          # https://visitorbadge.io
+          mkdir -p traffic
+          TODAY=$(date +%Y-%m-%d)
+          CSV_FILE="traffic/site_traffic.csv"
           
-          echo "bWtkaXIgLXAgdHJhZmZpYwpUT0RBWT0kKGRhdGUgKyVZZSVtLSVkKQpDU1ZfRklMRT0idHJhZmZpYy9zaXRlX3RyYWZmaWMuY3N2IgpTVkdfREFUQT0kKGN1cmwgLXMgLUwgLS1tYXgtdGltZSAxNSAiaHR0cHM6Ly9hcGkudmlzaXRvcnJiYWRnZS5pby9hcGkvdmlzaXRvcnM/aWQ9dm9ndHBldC5naXRodWIuaW8uTkhLJmxhYmVsPXZpZXdzIikKCkxJVkVfQ09VTlQ9JChlY2hvICIkU1ZHX0RBVEEiIHwgZ3JlcCAtb0UgJzx0ZXh0W14+XSo+W148XSo8L3RleHQ+JyB8IHRhaWwgLW4gMSB8IHNlZCAtZSAncy88W14+XSo+Ly9nJyB8IHRyIC1kYyAnMC05JykKZWNobyAiREVCVUc6IEVYVFJBQ1RFRE5VTUJFUiBJUzogJExJVkVfQ09VTlQiCgppZiBbIC16ICIkTExJVkVfQ09VTlQiIF07IHRoZW4KICBlY2hvICJFcnJvcjogRXh0cmFjdGlvbiBwYXJzaW5nIHJlc3VsdGVkIGluIGFuIGVtcHR5IHN0cmluZy4iCiAgZXhpdCAxCmZpCgppZiBbICEgLWYgIiRDU1ZfRklMRSIgXTsgdGhlbAogIGVjaG8gIkRhdGUsRGFpbHlWaWV3cyxMaXZlVG90YWwiID4gIiRDU1ZfRklMRSIKZmkKCmlmIGdyZXAgLXEgIiRUT0RBWSIgIiRDU1ZfRklMRSI7IHRoZW4KICBzZWQgLWkgIi8kVE9EQVkvZCIgIiRDU1ZfRklMRSIKZmkKCkxBU1RfVE9UQUw9JCh0YWlsIC1uIDEgIiRDU1ZfRklMRSIgfCBjdXQtZCcsJyAtZjMpCmlmIFsgLXogIiRMQVNUX1RPVEFMIiBdIHx8IFsgIiRMQVNUX1RPVEFMIiA9ICJMaXZlVG90YWwiIF0gfHwgWyAkeyNMQVNUX1RPVEFMfSAtZ3QgMTUgXTsgdGhlbgogIExBU1RfVE9UQUw9JExJVkVfQ09VTlQKZmkKCkRBSUxZX1ZJRVdTPSQoKExJVkVfQ09VTlQgLSBMQVNUX1RPVEFMKSkKaWYgWyAkREFJTFlfVklFV1MgLWx0IDAgXTsgdGhlbiBEQUlMWV9WSUVXUz0wOyBmaQoKZWNobyAiJFRPREFZLCREQUlMWV9WSUVXUywkTElWRV9DT1VOVCIgPj4gIiRDU1ZfRklMRSI=" | base64 --decode > run_backup.sh
+          echo "=== ASSEMBLING SECURE ENDPOINT ==="
+          # Safely append the variable parameters using shell manipulation strings
+          API_URL="https://visitorbadge.io{{ vars.BADGE_SLUG }}"
           
-          # Execute the isolated safe script block
-          bash run_backup.sh
-          rm run_backup.sh
+          echo "=== FETCHING DATA ==="
+          SVG_DATA=$(curl -s -L --max-time 15 "$API_URL")
+          
+          # Isolate the exact inner metric text array
+          EXTRACTED_VAL=$(echo "$SVG_DATA" | grep -oE '<text[^>]*>[^<]*</text>' | tail -n 1 | sed -e 's/<[^>]*>//g')
+          LIVE_COUNT=$(echo "$EXTRACTED_VAL" | tr -dc '0-9')
+          
+          echo "DEBUG: EXTRACTED NUMBER IS: $LIVE_COUNT"
+          
+          if [ -z "$LIVE_COUNT" ]; then
+            echo "Error: Extraction parsing resulted in an empty string."
+            exit 1
+          fi
+          
+          if [ ! -f "$CSV_FILE" ]; then
+            echo "Date,DailyViews,LiveTotal" > "$CSV_FILE"
+          fi
+          
+          if grep -q "$TODAY" "$CSV_FILE"; then
+            sed -i "/$TODAY/d" "$CSV_FILE"
+          fi
+          
+          LAST_TOTAL=$(tail -n 1 "$CSV_FILE" | cut -d',' -f3)
+          if [ -z "$LAST_TOTAL" ] || [ "$LAST_TOTAL" = "LiveTotal" ] || [ ${#LAST_TOTAL} -gt 15 ]; then
+            LAST_TOTAL=$LIVE_COUNT
+          fi
+          
+          DAILY_VIEWS=$((LIVE_COUNT - LAST_TOTAL))
+          if [ $DAILY_VIEWS -lt 0 ]; then DAILY_VIEWS=0; fi
+          
+          echo "$TODAY,$DAILY_VIEWS,$LIVE_COUNT" >> "$CSV_FILE"
+          echo "=== SUCCESS: CSV UPDATED ==="
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@://github.com"
+
           git add traffic/
           git diff --quiet && git diff --staged --quiet || git commit -m "Update repository traffic and site counter log entries"
           git push
