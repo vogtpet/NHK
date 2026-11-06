@@ -21,9 +21,9 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           CSV_FILE="traffic/site_traffic.csv"
           
-          echo "=== FETCHING DATA FROM STABLE HIT COUNTER ==="
-          # Using path parameter format for visitorbadge
-          SVG_DATA=$(curl -s -L --max-time 15 "https://api.visitorbadge.io/api/visitors?path=vogtpet-nhk-site")
+          echo "=== FETCHING DATA VIA PROTECTED SECRET BOUNDARY ==="
+          # This securely pulls the full untruncated URL parameters from your settings
+          SVG_DATA=$(curl -s -L --max-time 15 "${{ secrets.COUNTER_URL }}")
           
           echo "DEBUG: RAW OUTPUT START"
           echo "$SVG_DATA"
@@ -54,7 +54,6 @@ jobs:
           
           LAST_TOTAL=$(tail -n 1 "$CSV_FILE" | cut -d',' -f3)
           if [ -z "$LAST_TOTAL" ] || [ "$LAST_TOTAL" = "LiveTotal" ] || [ ${#LAST_TOTAL} -gt 15 ]; then
-            # Reset baseline hook if old values are corrupted string artifacts
             LAST_TOTAL=$LIVE_COUNT
           fi
           
