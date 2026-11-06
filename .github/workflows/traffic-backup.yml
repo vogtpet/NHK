@@ -21,14 +21,21 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           CSV_FILE="traffic/site_traffic.csv"
           
-          echo "=== DEBUG: FETCHING DATA ==="
-          SVG_DATA=$(curl -s -L --max-time 15 "https://profile-counter.glitch.me/vogtpet-nhk-site/count.svg")
+          echo "=== FETCHING DATA FROM STABLE HIT COUNTER ==="
+          # Swapping to a reliable, always-on API edge engine
+          SVG_DATA=$(curl -s -L --max-time 15 "https://visitorbadge.io")
           
-          echo "DEBUG: RAW SVG OUTPUT START"
+          echo "DEBUG: RAW OUTPUT START"
           echo "$SVG_DATA"
-          echo "DEBUG: RAW SVG OUTPUT END"
+          echo "DEBUG: RAW OUTPUT END"
           
-          # Clean extraction matching any sequence of digits inside the xml data elements
+          # Verify that we actually received an image/svg framework back rather than an error page
+          if [[ "$SVG_DATA" != *"<svg"* ]]; then
+            echo "Error: Received invalid network response from counter service. Aborting to safeguard CSV logs."
+            exit 1
+          fi
+          
+          # Extract numerical metric inside the text boundaries safely
           LIVE_COUNT=$(echo "$SVG_DATA" | tr -dc '0-9' | sed 's/^0*//')
           echo "DEBUG: EXTRACTED NUMBER IS: $LIVE_COUNT"
           
@@ -46,7 +53,8 @@ jobs:
           fi
           
           LAST_TOTAL=$(tail -n 1 "$CSV_FILE" | cut -d',' -f3)
-          if [ -z "$LAST_TOTAL" ] || [ "$LAST_TOTAL" = "LiveTotal" ]; then
+          if [ -z "$LAST_TOTAL" ] || [ "$LAST_TOTAL" = "LiveTotal" ] || [ ${#LAST_TOTAL} -gt 15 ]; then
+            # Reset baseline hook if old values are corrupted string artifacts
             LAST_TOTAL=$LIVE_COUNT
           fi
           
@@ -54,7 +62,8 @@ jobs:
           if [ $DAILY_VIEWS -lt 0 ]; then DAILY_VIEWS=0; fi
           
           echo "$TODAY,$DAILY_VIEWS,$LIVE_COUNT" >> "$CSV_FILE"
-          echo "=== DEBUG: SUCCESS, CSV UPDATED ==="
+          echo "=== SUCCESS: CSV UPDATED ==="
+
 
 
       # --- UPDATE AUTOMATED PUSH LAYER ---
