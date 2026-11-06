@@ -27,7 +27,6 @@ jobs:
           import os
           import re
           
-          # Read the raw, completely hidden URL directly out of runner memory
           full_url = os.environ.get("PROTECTED_URL", "")
           
           try:
@@ -35,7 +34,6 @@ jobs:
               with urllib.request.urlopen(req) as response:
                   svg_data = response.read().decode("utf-8")
               
-              # Extract contents of the text tags safely
               matches = re.findall(r"<text[^>]*>(.*?)</text>", svg_data)
               if matches:
                   count = "".join(filter(str.isdigit, matches[-1]))
@@ -51,7 +49,6 @@ jobs:
 
           cat python_output.txt
           
-          # Extract clean metric count from the log file
           LIVE_COUNT=$(grep "EXTRACTED_NUMBER_FOUND:" python_output.txt | cut -d':' -f2)
           rm python_output.txt
           
@@ -83,10 +80,65 @@ jobs:
         env:
           PROTECTED_URL: ${{ secrets.COUNTER_URL }}
 
+      - name: Fetch GitHub Repository Code Views
+        run: |
+          mkdir -p traffic
+          
+          echo "=== RUNNING PYTHON REPO VIEW FETCH ==="
+          python3 -c '
+          import urllib.request
+          import json
+          import os
+          
+          # Joining strings step-by-step to prevent the link filter from stripping API segments
+          base_api = "https://api.github.com"
+          repo_path = "/repos/vogtpet/NHK"
+          metrics_ep = "/traffic/views"
+          full_url = base_api + repo_path + metrics_ep
+          
+          token = os.environ.get("GITHUB_TOKEN", "")
+          
+          try:
+              req = urllib.request.Request(full_url)
+              req.add_header("Accept", "application/vnd.github+json")
+              req.add_header("Authorization", f"Bearer {token}")
+              
+              with urllib.request.urlopen(req) as response:
+                  data = json.loads(response.read().decode("utf-8"))
+              
+              views_list = data.get("views", [])
+              if views_list:
+                  csv_path = "traffic/views.csv"
+                  existing = {}
+                  
+                  if os.path.exists(csv_path):
+                      with open(csv_path, "r") as f:
+                          for line in f.readlines()[1:]:
+                              parts = line.strip().split(",")
+                              if len(parts) >= 3:
+                                  existing[parts[0]] = (parts[1], parts[2])
+                  
+                  for v in views_list:
+                      day = v["timestamp"][:10]
+                      existing[day] = (str(v["count"]), str(v["uniques"]))
+                  
+                  with open(csv_path, "w") as f:
+                      f.write("Date,count,uniques\n")
+                      for day in sorted(existing.keys()):
+                          f.write(f"{day},{existing[day][0]},{existing[day][1]}\n")
+                  print("SUCCESS: REPOSITORY TRAFFIC LOGS UPDATED CHRONOLOGICALLY")
+              else:
+                  print("WARNING: No view entries returned inside the 14-day tracking frame.")
+          except Exception as e:
+              print(f"ERROR: Repository fetch execution failed: {e}")
+          '
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@://github.com"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           git add traffic/
           git diff --quiet && git diff --staged --quiet || git commit -m "Update repository traffic and site counter log entries"
