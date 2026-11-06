@@ -21,18 +21,40 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           CSV_FILE="traffic/site_traffic.csv"
           
-          echo "=== PROCESSING ENCODED STRING ==="
-          # Pure ASCII hex sequences to assemble: https://visitorbadge.io
-          PART_A=$(printf "\x68\x74\x74\x70\x73\x3a\x2f\x2f\x61\x70\x6i\x2e\x76\x69\x73\x69\x74\x6f\x72\x62\x61\x64\x67\x65\x2e\x69\x6f")
-          PART_B=$(printf "\x2f\x61\x70\x6i\x2f\x76\x69\x73\x69\x74\x6f\x72\x73\x3f\x70\x61\x74\x68\x3d\x76\x6f\x67\x74\x70\x65\x74\x2d\x6e\x68\x6b\x2d\x73\x69\x74\x65")
+          echo "=== RUNNING PYTHON SECURE FETCH ==="
+          python3 -c '
+          import urllib.request
+          import re
           
-          FINAL_URL="${PART_A}${PART_B}"
+          # Constructing the exact, untruncated URL step by step safely in memory
+          domain = "https://visitorbadge.io"
+          endpoint = "/api/visitors"
+          query = "?path=vogtpet-nhk-site"
+          full_url = domain + endpoint + query
           
-          echo "=== FETCHING DATA FROM HIT COUNTER ==="
-          SVG_DATA=$(curl -s -L --max-time 15 "$FINAL_URL")
+          try:
+              req = urllib.request.Request(full_url, headers={"User-Agent": "Mozilla/5.0"})
+              with urllib.request.urlopen(req) as response:
+                  svg_data = response.read().decode("utf-8")
+              
+              # Find the exact text element count value inside the SVG tags
+              matches = re.findall(r"<text[^>]*>(.*?)</text>", svg_data)
+              if matches:
+                  # Clear out any commas or formatting to leave only raw digits
+                  count = "".join(filter(str.isdigit, matches[-1]))
+                  print(f"EXTRACTED_NUMBER_FOUND:{count}")
+              else:
+                  print("ERROR: No text tags found inside the image framework.")
+          except Exception as e:
+              print(f"ERROR: Network fetch failed: {e}")
+          ' > python_output.txt
+
+          cat python_output.txt
           
-          # Isolate the numeric count sitting inside the final text container tag element safely
-          LIVE_COUNT=$(echo "$SVG_DATA" | grep -oE '<text[^>]*>[^<]*</text>' | tail -n 1 | sed -e 's/<[^>]*>//g' | tr -dc '0-9')
+          # Isolate the extracted count value from the script log output
+          LIVE_COUNT=$(grep "EXTRACTED_NUMBER_FOUND:" python_output.txt | cut -d':' -f2)
+          rm python_output.txt
+          
           echo "DEBUG: EXTRACTED NUMBER IS: $LIVE_COUNT"
           
           if [ -z "$LIVE_COUNT" ]; then
