@@ -21,17 +21,18 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           CSV_FILE="traffic/site_traffic.csv"
           
-          echo "=== ASSEMBLING SECURE ENDPOINT ==="
-          # Safely append the variable parameters using shell manipulation strings
-          API_URL="https://visitorbadge.io{{ vars.BADGE_SLUG }}"
+          echo "=== PROCESSING ENCODED STRING ==="
+          # Pure ASCII hex sequences to assemble: https://visitorbadge.io
+          PART_A=$(printf "\x68\x74\x74\x70\x73\x3a\x2f\x2f\x61\x70\x6i\x2e\x76\x69\x73\x69\x74\x6f\x72\x62\x61\x64\x67\x65\x2e\x69\x6f")
+          PART_B=$(printf "\x2f\x61\x70\x6i\x2f\x76\x69\x73\x69\x74\x6f\x72\x73\x3f\x70\x61\x74\x68\x3d\x76\x6f\x67\x74\x70\x65\x74\x2d\x6e\x68\x6b\x2d\x73\x69\x74\x65")
           
-          echo "=== FETCHING DATA ==="
-          SVG_DATA=$(curl -s -L --max-time 15 "$API_URL")
+          FINAL_URL="${PART_A}${PART_B}"
           
-          # Isolate the exact inner metric text array
-          EXTRACTED_VAL=$(echo "$SVG_DATA" | grep -oE '<text[^>]*>[^<]*</text>' | tail -n 1 | sed -e 's/<[^>]*>//g')
-          LIVE_COUNT=$(echo "$EXTRACTED_VAL" | tr -dc '0-9')
+          echo "=== FETCHING DATA FROM HIT COUNTER ==="
+          SVG_DATA=$(curl -s -L --max-time 15 "$FINAL_URL")
           
+          # Isolate the numeric count sitting inside the final text container tag element safely
+          LIVE_COUNT=$(echo "$SVG_DATA" | grep -oE '<text[^>]*>[^<]*</text>' | tail -n 1 | sed -e 's/<[^>]*>//g' | tr -dc '0-9')
           echo "DEBUG: EXTRACTED NUMBER IS: $LIVE_COUNT"
           
           if [ -z "$LIVE_COUNT" ]; then
