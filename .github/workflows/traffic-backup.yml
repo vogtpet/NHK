@@ -82,56 +82,63 @@ jobs:
 
       - name: Fetch GitHub Repository Code Views
         run: |
-          TODAY=$(date +%Y-%m-%d)
-          REPO_FILE="traffic/views.csv"
+          mkdir -p traffic
           
-          echo "=== FETCHING REPOSITORY VIEWS ==="
-          # Querying GitHub REST API directly inside the Action environment
-          curl -s -H "Accept: application/vnd.github+json" \
-               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-               "https://github.com{{ github.repository }}/traffic/views" > repo_views.json
-               
-          # Format JSON data block cleanly to merge entries with your log tracking
+          echo "=== RUNNING PYTHON REPO VIEW FETCH ==="
           python3 -c '
+          import urllib.request
           import json
           import os
           
+          # Joining strings step-by-step to prevent the link filter from stripping API segments
+          base_api = "https://api.github.com"
+          repo_path = "/repos/vogtpet/NHK"
+          metrics_ep = "/traffic/views"
+          full_url = base_api + repo_path + metrics_ep
+          
+          token = os.environ.get("GITHUB_TOKEN", "")
+          
           try:
-              with open("repo_views.json", "r") as f:
-                  data = json.load(f)
+              req = urllib.request.Request(full_url)
+              req.add_header("Accept", "application/vnd.github+json")
+              req.add_header("Authorization", f"Bearer {token}")
+              
+              with urllib.request.urlopen(req) as response:
+                  data = json.loads(response.read().decode("utf-8"))
               
               views_list = data.get("views", [])
               if views_list:
-                  # Open or initialize target CSV tracker archive
                   csv_path = "traffic/views.csv"
                   existing = {}
+                  
                   if os.path.exists(csv_path):
                       with open(csv_path, "r") as f:
                           for line in f.readlines()[1:]:
                               parts = line.strip().split(",")
                               if len(parts) >= 3:
-                                  existing[parts[0][:10]] = (parts[1], parts[2])
+                                  existing[parts[0]] = (parts[1], parts[2])
                   
-                  # Add new traffic elements over the 14-day rolling window
                   for v in views_list:
                       day = v["timestamp"][:10]
                       existing[day] = (str(v["count"]), str(v["uniques"]))
-                      
-                  # Save and write entries ordered chronologically
+                  
                   with open(csv_path, "w") as f:
                       f.write("Date,count,uniques\n")
                       for day in sorted(existing.keys()):
                           f.write(f"{day},{existing[day][0]},{existing[day][1]}\n")
-                  print("=== REPOSITORY TRAFFIC LOG MERGED ===")
+                  print("SUCCESS: REPOSITORY TRAFFIC LOGS UPDATED CHRONOLOGICALLY")
+              else:
+                  print("WARNING: No view entries returned inside the 14-day tracking frame.")
           except Exception as e:
-              print(f"Error handling views output: {e}")
+              print(f"ERROR: Repository fetch execution failed: {e}")
           '
-          rm -f repo_views.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@://github.com"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           git add traffic/
           git diff --quiet && git diff --staged --quiet || git commit -m "Update repository traffic and site counter log entries"
