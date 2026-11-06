@@ -27,7 +27,6 @@ jobs:
           import os
           import re
           
-          # Read the raw, completely hidden URL directly out of runner memory
           full_url = os.environ.get("PROTECTED_URL", "")
           
           try:
@@ -35,7 +34,6 @@ jobs:
               with urllib.request.urlopen(req) as response:
                   svg_data = response.read().decode("utf-8")
               
-              # Extract contents of the text tags safely
               matches = re.findall(r"<text[^>]*>(.*?)</text>", svg_data)
               if matches:
                   count = "".join(filter(str.isdigit, matches[-1]))
@@ -51,7 +49,6 @@ jobs:
 
           cat python_output.txt
           
-          # Extract clean metric count from the log file
           LIVE_COUNT=$(grep "EXTRACTED_NUMBER_FOUND:" python_output.txt | cut -d':' -f2)
           rm python_output.txt
           
@@ -82,6 +79,54 @@ jobs:
           echo "=== SUCCESS: CSV UPDATED ==="
         env:
           PROTECTED_URL: ${{ secrets.COUNTER_URL }}
+
+      - name: Fetch GitHub Repository Code Views
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          REPO_FILE="traffic/views.csv"
+          
+          echo "=== FETCHING REPOSITORY VIEWS ==="
+          # Querying GitHub REST API directly inside the Action environment
+          curl -s -H "Accept: application/vnd.github+json" \
+               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               "https://github.com{{ github.repository }}/traffic/views" > repo_views.json
+               
+          # Format JSON data block cleanly to merge entries with your log tracking
+          python3 -c '
+          import json
+          import os
+          
+          try:
+              with open("repo_views.json", "r") as f:
+                  data = json.load(f)
+              
+              views_list = data.get("views", [])
+              if views_list:
+                  # Open or initialize target CSV tracker archive
+                  csv_path = "traffic/views.csv"
+                  existing = {}
+                  if os.path.exists(csv_path):
+                      with open(csv_path, "r") as f:
+                          for line in f.readlines()[1:]:
+                              parts = line.strip().split(",")
+                              if len(parts) >= 3:
+                                  existing[parts[0][:10]] = (parts[1], parts[2])
+                  
+                  # Add new traffic elements over the 14-day rolling window
+                  for v in views_list:
+                      day = v["timestamp"][:10]
+                      existing[day] = (str(v["count"]), str(v["uniques"]))
+                      
+                  # Save and write entries ordered chronologically
+                  with open(csv_path, "w") as f:
+                      f.write("Date,count,uniques\n")
+                      for day in sorted(existing.keys()):
+                          f.write(f"{day},{existing[day][0]},{existing[day][1]}\n")
+                  print("=== REPOSITORY TRAFFIC LOG MERGED ===")
+          except Exception as e:
+              print(f"Error handling views output: {e}")
+          '
+          rm -f repo_views.json
 
       - name: Commit and Push Changes
         run: |
