@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$title – $site</title>
+<meta name="description" content="$description">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="$canonical">
+<meta name="author" content="Willi Vogt, Reinhild Vogt, Dr. Peter Vogt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="$site">
+<meta property="og:locale" content="de_DE">
+<meta property="og:title" content="$title – $site">
+<meta property="og:description" content="$description">
+<meta property="og:url" content="$canonical">
+<meta property="og:image" content="$base/assets/front.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="application/pdf" href="../docs/NHK2026.pdf">
+<link rel="stylesheet" href="../assets/site.css">
+<script type="application/ld+json">
+$jsonld
+</script>
+</head>
+<body>
+<a class="skip" href="#inhalt">Zum Inhalt springen</a>
+<header class="bar">
+  <a class="brand" href="../">$site</a>
+  <nav><a class="btn" href="$pdf_reader">Im Buch lesen (S. $page)</a></nav>
+</header>
+<div class="wrap">
+  <nav class="crumbs" aria-label="Brotkrümelnavigation">
+    <a href="../">Start</a> › <a href="../wissen/">Wissen A–Z</a> › <span>$title</span>
+  </nav>
+  <main id="inhalt">
+    <h1>$title</h1>
+    <p class="meta">Aus dem Buch <a href="../">$site</a> von Heilpraktiker Willi Vogt · Seite $page_range · Stand: Oktober 2026</p>
+      $body
+    <aside class="disclaimer">
+      <p><strong>Wichtiger Hinweis:</strong> Die in diesem Buch bereitgestellten Informationen, praktischen Tipps und
+      naturheilkundlichen Verfahren basieren auf den langjährigen Erfahrungen und der praktischen Tätigkeit des Autors
+      als Heilpraktiker. Sie wurden mit größter Sorgfalt zusammengestellt und dienen ausschließlich der allgemeinen
+      Information, der Aufklärung und der Selbsthilfe bei leichten Befindlichkeitsstörungen.</p>
+      <p><strong>Kein Ersatz für ärztlichen Rat:</strong> Die Inhalte ersetzen in keinem Fall eine professionelle
+      medizinische Beratung, Diagnose oder Behandlung durch einen approbierten Arzt, Facharzt oder Therapeuten.
+      Suchen Sie bei gesundheitlichen Beschwerden, chronischen Leiden oder anhaltenden Symptomen stets qualifizierten
+      ärztlichen Rat auf.</p>
+      <p><strong>Eigenverantwortung:</strong> Die Anwendung der beschriebenen Ratschläge, Hausmittel und Rezepturen
+      erfolgt ausdrücklich auf eigene Gefahr und in eigener Verantwortung des Lesers. Autor, Co-Autoren und Herausgeber
+      übernehmen keinerlei Haftung für Schäden, Nachteile oder gesundheitliche Beeinträchtigungen, die direkt oder
+      indirekt aus der praktischen Umsetzung der hier enthaltenen Informationen resultieren.</p>
+      <p class="hint-date">Stand: Oktober 2026</p>
+    </aside>
+    <aside class="author">
+      <img src="../assets/WilliVogt.jpg" width="88" height="123" alt="Porträt von Willi Vogt" loading="lazy">
+      <div class="author-body">
+        <p><strong>Willi Vogt</strong> (1939–2023) war Heilpraktiker und führte eine Naturheilpraxis in Boppard.</p>
+        <p>Neuauflage 2026 · Mitarbeit: Reinhild Vogt · Herausgeber: Dr. Peter Vogt</p>
+        <p><a href="../autoren/">Über Autor und Herausgeber</a> · Lizenz
+        <a href="$license" rel="license">CC BY 4.0</a></p>
+      </div>
+    </aside>
+    <nav class="pager">
+      <span>$prev</span>
+      <span>$next</span>
+    </nav>
+  </main>
+</div>
+<footer>
+  <p><a href="../">$site</a> · <a href="../wissen/">Wissen A–Z</a> · <a href="../autoren/">Autoren</a> ·
+  <a href="../impressum/">Impressum</a> · <a href="../datenschutz/">Datenschutz</a></p>
+  <p><a href="../docs/NHK2026.pdf">PDF</a> · <a href="../docs/NHK2026.epub">eBook</a> ·
+  <a href="https://github.com/vogtpet/NHK">Quellcode</a> · <a href="$license">CC BY 4.0</a> ·
+  Stand: Oktober 2026</p>
+</footer>
+</body>
+</html>
