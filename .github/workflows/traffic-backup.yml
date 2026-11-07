@@ -133,7 +133,7 @@ jobs:
               print(f"ERROR: Repository fetch execution failed: {e}")
           '
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.METRICS_TOKEN }}
 
       - name: Commit and Push Changes
         run: |
