@@ -400,8 +400,11 @@ def build_jsonld(ch, url, description):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--all", action="store_true")
-    ap.add_argument("--pilot", action="store_true")
+    ap.add_argument("--all", action="store_true", help="build every top-level chapter")
+    ap.add_argument("--pilot", action="store_true", help="build the 10 pilot chapters")
+    ap.add_argument("--only", help="comma separated slugs to build")
+    ap.add_argument("--batch", type=int, default=0, help="build the next N unbuilt chapters (1-based)")
+    ap.add_argument("--size", type=int, default=30, help="chapters per batch (default 30)")
     args = ap.parse_args()
 
     reader = PdfReader(str(PDF_PATH))
@@ -415,15 +418,26 @@ def main():
 
     toc = parse_toc()
     chapters = parse_chapters(toc, page_count)
+    on_disk = {c["slug"] for c in chapters if (ROOT / c["slug"] / "index.html").exists()}
 
     if args.all:
         selected = chapters
+    elif args.only:
+        wanted = {s.strip() for s in args.only.split(",")}
+        selected = [c for c in chapters if c["slug"] in wanted]
+    elif args.batch:
+        remaining = [c for c in chapters if c["slug"] not in on_disk]
+        start = (args.batch - 1) * args.size
+        selected = remaining[start : start + args.size]
+        if not selected:
+            print(f"  nothing left to build ({len(remaining)} unbuilt chapters)")
+            return
     else:
         wanted = {slugify(DISPLAY.get(t, t)) for t in PILOT}
         selected = [c for c in chapters if c["slug"] in wanted]
 
-    built = {c["slug"] for c in selected}
-    by_slug = {c["slug"]: c for c in chapters}
+    built = on_disk | {c["slug"] for c in selected}
+    built_chapters = [c for c in chapters if c["slug"] in built]
     total_pages = 0
 
     def link_for(ch):
@@ -497,8 +511,8 @@ def main():
         print(f'  {ch["slug"]:<28} S. {ch["start"]:>3}–{ch["end"]:<3} {len(body):>6} bytes')
 
     write_hub(selected, chapters, built)
-    write_sitemap(selected)
-    print(f"\n{len(selected)} chapters, {total_pages} PDF pages extracted")
+    write_sitemap(built_chapters)
+    print(f"\n{len(selected)} built this run, {len(built_chapters)} total, {total_pages} PDF pages extracted")
 
 
 HUB = Template("""<!DOCTYPE html>
@@ -609,9 +623,9 @@ def write_hub(selected, chapters, built):
     print(f"  wissen/index.html  ({len(built)} linked chapters, {sum(len(v) for v in groups.values())} entries)")
 
 
-def write_sitemap(selected):
+def write_sitemap(built_chapters):
     urls = [(BASE_URL + "/", "2026-11-07"), (BASE_URL + "/wissen/", "2026-11-07")] + [
-        (f'{BASE_URL}/{c["slug"]}/', "2026-11-07") for c in selected
+        (f'{BASE_URL}/{c["slug"]}/', "2026-11-07") for c in built_chapters
     ] + [(BASE_URL + "/docs/NHK2026.pdf", "2026-10-29")]
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
