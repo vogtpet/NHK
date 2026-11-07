@@ -15,6 +15,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas matplotlib
+
       - name: Fetch Website Visitor Counter
         run: |
           mkdir -p traffic
@@ -90,8 +100,7 @@ jobs:
           import json
           import os
           
-          # Joining strings step-by-step to prevent the link filter from stripping API segments
-          base_api = "https://api.github.com"
+          base_api = "https://github.com"
           repo_path = "/repos/vogtpet/NHK"
           metrics_ep = "/traffic/views"
           full_url = base_api + repo_path + metrics_ep
@@ -135,11 +144,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.METRICS_TOKEN }}
 
+      - name: Generate Unified Dashboard Graphic Image
+        run: |
+          echo "=== EXECUTING PYTHON DATA VISUALIZATION ENGINE ==="
+          # Triggers the plotting code file you added to the root directory
+          python3 plot_dashboard.py
+
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.email "github-actions[bot]@://github.com"
 
-          git add traffic/
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update repository traffic and site counter log entries"
+          # Add the updated logs as well as the freshly overwitten analytical graphic image file
+          git add traffic/ unified_dashboard_analytics.png
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update logs and refresh automated dashboard graphic analytics"
           git push
