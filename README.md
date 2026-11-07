@@ -19,7 +19,7 @@ Aktualisierte Neuauflage: Oktober 2026
 
 b) Urheberrecht & Veröffentlichung:
 -----------
-Das Werk wurde ursprünglich im Eigenverlag als kommerzielles E-Book unter der ISBN 978-3-00-039171-2 veröffentlicht. Die digitale Neuauflage im Jahr 2026 wird durch den rechtmäßigen Erben Dr. Peter Vogt unter den Bedingungen der Creative-Commons-Lizenz CC-BY 4.0 International frei zur Verfügung gestellt.
+Das Werk wurde ursprünglich im Eigenverlag als kommerzielles E-Book veröffentlicht. Die digitale Neuauflage im Jahr 2026 wird durch den rechtmäßigen Erben Dr. Peter Vogt unter den Bedingungen der Creative-Commons-Lizenz CC-BY 4.0 International frei zur Verfügung gestellt.
 
 c) Lizenzbestimmungen:
 -----------

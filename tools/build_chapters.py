@@ -26,7 +26,6 @@ ROOT = Path(__file__).resolve().parent.parent
 PDF_PATH = ROOT / "docs" / "NHK2026.pdf"
 BASE_URL = "https://vogtpet.github.io/NHK"
 SITE_NAME = "Naturheilkunde für den Hausgebrauch"
-ISBN = "978-3-00-039171-2"
 PUBLISHED = "2026-10-01"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 
@@ -266,102 +265,9 @@ def parse_chapters(toc, page_count):
 
 
 # ---------------------------------------------------------------- templates
-TEMPLATE = Template("""<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>$title – $site</title>
-<meta name="description" content="$description">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<link rel="canonical" href="$canonical">
-<meta name="author" content="Willi Vogt, Reinhild Vogt, Dr. Peter Vogt">
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="$site">
-<meta property="og:locale" content="de_DE">
-<meta property="og:title" content="$title – $site">
-<meta property="og:description" content="$description">
-<meta property="og:url" content="$canonical">
-<meta property="og:image" content="$base/assets/front.png">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="alternate" type="application/pdf" href="$base/docs/NHK2026.pdf">
-<script type="application/ld+json">
-$jsonld
-</script>
-<style>
-:root { --ink:#22262b; --muted:#5b6672; --line:#e1e4e8; --brand:#2c3e50; --accent:#27ae60; }
-* { box-sizing:border-box; }
-body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-       color:var(--ink); line-height:1.65; background:#fff; }
-a { color:#0366d6; }
-.bar { background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:space-between;
-       gap:12px; padding:10px 20px; flex-wrap:wrap; }
-.bar .brand { color:#fff; text-decoration:none; font-weight:600; font-size:15px; }
-.bar .btn { background:var(--accent); color:#fff; text-decoration:none; padding:7px 12px; border-radius:4px;
-            font-size:14px; font-weight:600; white-space:nowrap; }
-.wrap { max-width:760px; margin:0 auto; padding:22px 20px 60px; }
-.crumbs { font-size:13px; color:var(--muted); margin-bottom:14px; }
-.crumbs a { color:var(--muted); }
-h1 { font-size:30px; line-height:1.25; margin:6px 0 8px; }
-.meta { color:var(--muted); font-size:14px; margin:0 0 22px; }
-.lead { font-size:19px; color:#3b4650; border-left:3px solid var(--accent); padding-left:14px; margin:0 0 26px; }
-h2 { font-size:20px; margin:30px 0 10px; padding-top:4px; }
-p { margin:0 0 14px; }
-ul { margin:0 0 16px; padding-left:22px; }
-li { margin-bottom:8px; }
-.disclaimer, .author { border:1px solid var(--line); border-radius:6px; padding:14px 16px; margin:30px 0 0;
-                       font-size:14px; color:#3b4650; background:#fafbfc; }
-.disclaimer strong, .author strong { color:var(--ink); }
-.pager { display:flex; justify-content:space-between; gap:16px; margin:34px 0 0; padding-top:18px;
-         border-top:1px solid var(--line); font-size:14px; }
-.pager a { text-decoration:none; }
-footer { border-top:1px solid var(--line); color:var(--muted); font-size:13px; padding:18px 20px;
-         text-align:center; }
-.skip { position:absolute; left:-9999px; }
-.skip:focus { left:12px; top:12px; background:#fff; padding:8px; z-index:10; }
-@media (max-width:600px){ h1{font-size:24px;} .bar{position:sticky;top:0;} }
-</style>
-</head>
-<body>
-<a class="skip" href="#inhalt">Zum Inhalt springen</a>
-<header class="bar">
-  <a class="brand" href="../">$site</a>
-  <nav><a class="btn" href="$pdf_reader">Im Buch lesen (S. $page)</a></nav>
-</header>
-<div class="wrap">
-  <nav class="crumbs" aria-label="Brotkrümelnavigation">
-    <a href="../">Start</a> › <a href="../wissen/">Wissen A–Z</a> › <span>$title</span>
-  </nav>
-  <main id="inhalt">
-    <h1>$title</h1>
-    <p class="meta">Aus dem Buch <a href="../">$site</a> von Heilpraktiker Willi Vogt · Seite $page_range</p>
-      $body
-    <aside class="disclaimer">
-      <strong>Wichtiger Hinweis:</strong> Diese Informationen dienen ausschließlich der allgemeinen Aufklärung
-      und Selbsthilfe bei leichten Befindlichkeitsstörungen. Sie ersetzen in keinem Fall eine ärztliche
-      Beratung, Diagnose oder Behandlung. Bei gesundheitlichen Beschwerden, chronischen Leiden oder
-      anhaltenden Symptomen suchen Sie bitte qualifizierten ärztlichen Rat. Die Anwendung erfolgt auf
-      eigene Verantwortung.
-    </aside>
-    <aside class="author">
-      <strong>Willi Vogt</strong> (1939–2023) war Heilpraktiker und führte eine Naturheilpraxis in Boppard.
-      Neuauflage 2026, bearbeitet von Reinhild Vogt und Dr. Peter Vogt. Lizenz:
-      <a href="$license" rel="license">CC BY 4.0</a>.
-    </aside>
-    <nav class="pager">
-      <span>$prev</span>
-      <span>$next</span>
-    </nav>
-  </main>
-</div>
-<footer>
-  <a href="../">Naturheilkunde für den Hausgebrauch</a> · <a href="$base/docs/NHK2026.pdf">PDF</a> ·
-  <a href="$base/docs/NHK2026.epub">eBook</a> · <a href="https://github.com/vogtpet/NHK">Quellcode</a> ·
-  ISBN $isbn
-</footer>
-</body>
-</html>
-""")
+TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
+TEMPLATE = Template((TEMPLATE_DIR / "chapter.html").read_text(encoding="utf-8"))
+HUB = Template((TEMPLATE_DIR / "hub.html").read_text(encoding="utf-8"))
 
 
 def build_jsonld(ch, url, description):
@@ -380,7 +286,6 @@ def build_jsonld(ch, url, description):
         "isPartOf": {
             "@type": "Book",
             "name": SITE_NAME,
-            "isbn": ISBN,
             "url": BASE_URL + "/",
         },
         "author": {"@type": "Person", "name": "Willi Vogt", "jobTitle": "Heilpraktiker"},
@@ -500,7 +405,6 @@ def main():
             page_range=f'{ch["start"]}–{ch["end"]}',
             body=body,
             license=LICENSE,
-            isbn=ISBN,
             prev=prev_html,
             next=next_html,
             jsonld=build_jsonld(ch, url, description),
@@ -514,55 +418,6 @@ def main():
     write_sitemap(built_chapters)
     print(f"\n{len(selected)} built this run, {len(built_chapters)} total, {total_pages} PDF pages extracted")
 
-
-HUB = Template("""<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wissen A–Z – $site</title>
-<meta name="description" content="Alle Krankheitsbilder und Hausmittel aus „$site“ von Heilpraktiker Willi Vogt – kostenlos online lesen, von A bis Z.">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<link rel="canonical" href="$base/wissen/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="$site">
-<meta property="og:locale" content="de_DE">
-<meta property="og:title" content="Wissen A–Z – $site">
-<meta property="og:url" content="$base/wissen/">
-<script type="application/ld+json">
-$jsonld
-</script>
-<style>
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#22262b;line-height:1.6}
-.bar{background:#2c3e50;padding:10px 20px}.bar a{color:#fff;text-decoration:none;font-weight:600}
-.wrap{max-width:760px;margin:0 auto;padding:22px 20px 60px}
-h1{font-size:28px;margin:6px 0 6px}
-p.sub{color:#5b6672;margin:0 0 26px}
-h2{font-size:16px;color:#5b6672;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #e1e4e8;padding-bottom:6px;margin:28px 0 10px}
-ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 18px}
-li a{display:block;padding:6px 8px;border-radius:4px;text-decoration:none;color:#0366d6}
-li a:hover{background:#f0f3f6}
-li a.pdf{color:#5b6672}
-footer{border-top:1px solid #e1e4e8;color:#5b6672;font-size:13px;padding:18px 20px;text-align:center}
-</style>
-</head>
-<body>
-<div class="bar"><a href="../">$site</a></div>
-<div class="wrap">
-  <h1>Wissen A–Z</h1>
-  <p class="sub">Krankheitsbilder, Beschwerden und Hausmittel aus dem Buch „$site“ von Heilpraktiker
-  Willi Vogt (1939–2023). Die Neuauflage 2026 steht vollständig kostenlos zur Verfügung – als
-  Web-Reader, PDF und eBook.</p>
-  <p class="sub">Kapitel mit eigener Seite sind hervorgehoben und enthalten den vollständigen Buchtext.
-  Alle übrigen Einträge öffnen die entsprechende Seite im PDF. Neue Kapitel werden laufend ergänzt;
-  Stand: November 2026.</p>
-  $groups
-</div>
-<footer><a href="../">Zurück zum Web-Reader</a> · <a href="$base/docs/NHK2026.pdf">PDF</a> ·
-<a href="$base/docs/NHK2026.epub">eBook</a> · Lizenz <a href="$license">CC BY 4.0</a></footer>
-</body>
-</html>
-""")
 
 
 def write_hub(selected, chapters, built):
@@ -580,7 +435,7 @@ def write_hub(selected, chapters, built):
                 items.append(f'<li><a href="../{ch["slug"]}/">{label}</a></li>')
             else:
                 items.append(f'<li><a class="pdf" href="../docs/NHK2026.pdf#page={ch["start"]}">{label}</a></li>')
-        out.append(f'<h2>{letter}</h2>\n<ul>\n  ' + "\n  ".join(items) + "\n</ul>")
+        out.append(f'<h2 class="letter">{letter}</h2>\n<ul class="letters">\n  ' + "\n  ".join(items) + "\n</ul>")
     target = ROOT / "wissen" / "index.html"
     target.parent.mkdir(exist_ok=True)
     built_chapters = [c for c in chapters if c["slug"] in built]
@@ -592,7 +447,7 @@ def write_hub(selected, chapters, built):
             "url": f"{BASE_URL}/wissen/",
             "inLanguage": "de",
             "description": f"Alle Krankheitsbilder und Hausmittel aus „{SITE_NAME}“ von Heilpraktiker Willi Vogt.",
-            "isPartOf": {"@type": "Book", "name": SITE_NAME, "isbn": ISBN, "url": f"{BASE_URL}/"},
+            "isPartOf": {"@type": "Book", "name": SITE_NAME, "url": f"{BASE_URL}/"},
             "mainEntity": {
                 "@type": "ItemList",
                 "numberOfItems": len(built_chapters),
@@ -624,7 +479,9 @@ def write_hub(selected, chapters, built):
 
 
 def write_sitemap(built_chapters):
-    urls = [(BASE_URL + "/", "2026-11-07"), (BASE_URL + "/wissen/", "2026-11-07")] + [
+    legal = [(BASE_URL + "/autoren/", "2026-11-07"), (BASE_URL + "/impressum/", "2026-11-07"),
+             (BASE_URL + "/datenschutz/", "2026-11-07")]
+    urls = [(BASE_URL + "/", "2026-11-07"), (BASE_URL + "/wissen/", "2026-11-07")] + legal + [
         (f'{BASE_URL}/{c["slug"]}/', "2026-11-07") for c in built_chapters
     ] + [(BASE_URL + "/docs/NHK2026.pdf", "2026-10-29")]
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',

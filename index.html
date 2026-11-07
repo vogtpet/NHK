@@ -66,6 +66,16 @@
             align-items: center;
             gap: 10px;
         }
+        .right-nav .nav-legal {
+            color: #cfd8e0;
+            text-decoration: none;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .right-nav .nav-legal:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
         .btn-download {
             background-color: #27ae60;
             color: white;
@@ -219,6 +229,10 @@
             .right-nav .btn-download {
                 display: none;
             }
+
+            .right-nav { gap: 6px; }
+            .right-nav .nav-legal { font-size: 12px; }
+            .right-nav .nav-authors { display: none; }
         
             .mobile-notice {
                 display: block;
@@ -266,7 +280,6 @@
           "url": "https://vogtpet.github.io/NHK/",
           "inLanguage": "de",
           "bookFormat": "https://schema.org/EBook",
-          "isbn": "978-3-00-039171-2",
           "datePublished": "2026-10-01",
           "description": "Kostenlose Neuauflage 2026: Naturheilkunde für den Hausgebrauch von Heilpraktiker Willi Vogt. Über 300 Krankheitsbilder und Hausmittel – kostenlos online lesen, als PDF und eBook.",
           "image": "https://vogtpet.github.io/NHK/assets/front.png",
@@ -313,6 +326,9 @@
             <h1>Naturheilkunde für den Hausgebrauch</h1>
         </div>
         <div class="right-nav">
+            <a class="nav-legal nav-authors" href="autoren/">Autoren</a>
+            <a class="nav-legal" href="impressum/">Impressum</a>
+            <a class="nav-legal" href="datenschutz/">Datenschutz</a>
             <a class="btn-download" href="docs/NHK2026.pdf?download=1">PDF Download</a>
         </div>
     </div>
@@ -799,7 +815,5 @@ if (allTocLinks) {
 
 
 </script>
-    <!-- Privacy-friendly hit counter tracking pixel -->
-    <img src="https://visitorbadge.io?id=vogtpet.github.io.NHK&label=views" alt="Visitor Counter" style="display:none;">
 </body>
 </html>
