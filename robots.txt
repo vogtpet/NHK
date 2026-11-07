@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vogtpet.github.io/NHK/sitemap.xml
