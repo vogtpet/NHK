@@ -55,3 +55,10 @@ Bezugsquelle:
 
 Dieses E-Book ist dauerhaft frei und kostenlos erhältlich unter:  
 GitHub: https://github.com/vogtpet/NHK
+
+---
+
+## 📊 Live Project Analytics
+
+![Project Dashboard Analytics](unified_dashboard_analytics.png)
+
