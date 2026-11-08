@@ -1,3 +1,7 @@
+**🌐 [Online lesen](https://vogtpet.github.io/NHK/) · [PDF herunterladen](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.pdf) · [eBook herunterladen](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.epub)**
+
+---
+
 <p align="center">
   <img src="assets/front.png" alt="Front Cover" width="600">
 </p>
