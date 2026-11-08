@@ -28,6 +28,7 @@ BASE_URL = "https://vogtpet.github.io/NHK"
 SITE_NAME = "Naturheilkunde für den Hausgebrauch"
 PUBLISHED = "2026-10-01"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+LASTMOD = "2026-11-08"
 
 # Chapters built by --pilot (title -> optional display title override)
 PILOT = [
@@ -479,11 +480,11 @@ def write_hub(selected, chapters, built):
 
 
 def write_sitemap(built_chapters):
-    legal = [(BASE_URL + "/autoren/", "2026-11-07"), (BASE_URL + "/impressum/", "2026-11-07"),
-             (BASE_URL + "/datenschutz/", "2026-11-07")]
-    urls = [(BASE_URL + "/", "2026-11-07"), (BASE_URL + "/wissen/", "2026-11-07")] + legal + [
-        (f'{BASE_URL}/{c["slug"]}/', "2026-11-07") for c in built_chapters
-    ] + [(BASE_URL + "/docs/NHK2026.pdf", "2026-10-29")]
+    legal = [(BASE_URL + "/autoren/", LASTMOD), (BASE_URL + "/impressum/", LASTMOD),
+             (BASE_URL + "/datenschutz/", LASTMOD)]
+    urls = [(BASE_URL + "/", LASTMOD), (BASE_URL + "/wissen/", LASTMOD)] + legal + [
+        (f'{BASE_URL}/{c["slug"]}/', LASTMOD) for c in built_chapters
+    ] + [(BASE_URL + "/docs/NHK2026.pdf", LASTMOD)]
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, mod in urls:
