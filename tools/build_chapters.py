@@ -3,12 +3,15 @@
 Build per-chapter HTML pages for the NHK web edition.
 
 Source of truth:
-  - docs/NHK2026.pdf      -> chapter text (pages)
+  - docs/NHK2026.epub     -> chapter text (default: clean XHTML per chapter)
+  - docs/NHK2026.pdf      -> page numbers, bookmarks, PDF fallback extraction
   - index.html            -> table of contents (titles + start pages)
 
 Usage:
   python3 tools/build_chapters.py --pilot     # 10 pilot chapters
+  python3 tools/build_chapters.py --batch 1   # next 30 unbuilt chapters
   python3 tools/build_chapters.py --all       # every top-level chapter
+  python3 tools/build_chapters.py --source pdf ...  # fallback extraction
 """
 import argparse
 import html
@@ -19,11 +22,15 @@ import unicodedata
 from pathlib import Path
 from string import Template
 
+from epub_extract import extract_chapter as extract_epub_chapter
+from epub_extract import norm_title, parse_toc as parse_epub_toc
+
 logging.getLogger("pypdf").setLevel(logging.ERROR)
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parent.parent
 PDF_PATH = ROOT / "docs" / "NHK2026.pdf"
+EPUB_PATH = ROOT / "docs" / "NHK2026.epub"
 BASE_URL = "https://vogtpet.github.io/NHK"
 SITE_NAME = "Naturheilkunde für den Hausgebrauch"
 PUBLISHED = "2026-10-01"
@@ -311,6 +318,8 @@ def main():
     ap.add_argument("--only", help="comma separated slugs to build")
     ap.add_argument("--batch", type=int, default=0, help="build the next N unbuilt chapters (1-based)")
     ap.add_argument("--size", type=int, default=30, help="chapters per batch (default 30)")
+    ap.add_argument("--source", choices=("epub", "pdf"), default="epub",
+                    help="chapter text source (default: epub; pdf kept as fallback)")
     args = ap.parse_args()
 
     reader = PdfReader(str(PDF_PATH))
@@ -318,9 +327,14 @@ def main():
         reader.decrypt("")
     page_count = len(reader.pages)
 
-    global VOCAB
-    VOCAB = build_vocab(reader)
-    print(f"  vocabulary: {len(VOCAB)} words")
+    if args.source == "pdf":
+        global VOCAB
+        VOCAB = build_vocab(reader)
+        print(f"  source: PDF ({len(VOCAB)} vocabulary words)")
+    else:
+        epub_chapters = parse_epub_toc(EPUB_PATH)
+        epub_by_title = {norm_title(c["title"]): c for c in epub_chapters}
+        print(f"  source: EPUB ({len(epub_chapters)} chapters)")
 
     toc = parse_toc()
     chapters = parse_chapters(toc, page_count)
@@ -352,10 +366,18 @@ def main():
         return f'<a href="../docs/NHK2026.pdf#page={ch["start"]}">{html.escape(ch["title"])}</a>'
 
     for ch in selected:
-        pages = [reader.pages[p - 1].extract_text(extraction_mode="layout") or "" for p in range(ch["start"], ch["end"] + 1)]
-        total_pages += len(pages)
-        blocks = blocks_for(pages)
-        body = render_body(blocks, ch["title"], ch["subs"])
+        if args.source == "epub":
+            epub_ch = epub_by_title.get(norm_title(ch["title"]))
+            if epub_ch is None:
+                raise SystemExit(f'  no EPUB chapter for {ch["title"]!r}')
+            body, plain_blocks = extract_epub_chapter(EPUB_PATH, epub_ch["file"], ch["subs"])
+            blocks = [ch["title"]] + plain_blocks
+            total_pages += ch["end"] - ch["start"] + 1
+        else:
+            pages = [reader.pages[p - 1].extract_text(extraction_mode="layout") or "" for p in range(ch["start"], ch["end"] + 1)]
+            total_pages += len(pages)
+            blocks = blocks_for(pages)
+            body = render_body(blocks, ch["title"], ch["subs"])
         title = DISPLAY.get(ch["title"], ch["title"])
         url = f'{BASE_URL}/{ch["slug"]}/'
 
@@ -417,7 +439,7 @@ def main():
 
     write_hub(selected, chapters, built)
     write_sitemap(built_chapters)
-    print(f"\n{len(selected)} built this run, {len(built_chapters)} total, {total_pages} PDF pages extracted")
+    print(f"\n{len(selected)} built this run, {len(built_chapters)} total, {total_pages} book pages covered")
 
 
 
