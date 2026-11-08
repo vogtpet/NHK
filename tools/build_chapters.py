@@ -450,6 +450,13 @@ def write_hub(selected, chapters, built):
             continue
         groups.setdefault(ch["title"][0].upper(), []).append(ch)
     out = []
+    intro = [
+        f'<li><a href="../{ch["slug"]}/">{html.escape(DISPLAY.get(ch["title"], ch["title"]))}</a></li>'
+        for ch in chapters
+        if ch["title"] in ("Vorwort", "Einleitung") and ch["slug"] in built
+    ]
+    if intro:
+        out.append('<h2 class="letter">Einführung</h2>\n<ul class="letters">\n  ' + "\n  ".join(intro) + "\n</ul>")
     for letter in sorted(groups):
         items = []
         for ch in groups[letter]:
