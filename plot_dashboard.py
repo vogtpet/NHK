@@ -1,143 +1,97 @@
 import os
+
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.ticker import MaxNLocator
 
-# Data log source definitions
-SITE_LOG = "traffic/site_traffic.csv"
-REPO_LOG = "traffic/views.csv"  # Your repository views history tracker file
+REPO_LOG = "traffic/views.csv"
 OUTPUT_IMAGE = "unified_dashboard_analytics.png"
 
 
-def load_and_process_data(file_path):
+def load_repo_data(file_path):
     if not os.path.exists(file_path):
         return None
     try:
         df = pd.read_csv(file_path)
-        # Handle variant column headings dynamically
         date_col = [c for c in df.columns if "date" in c.lower()][0]
         df[date_col] = pd.to_datetime(df[date_col])
-        df = df.sort_values(date_col)
-        return df, date_col
-    except Exception as e:
-        print(f"Warning: Error reading {file_path}: {e}")
+        return df.sort_values(date_col), date_col
+    except Exception as exc:
+        print(f"Warning: could not read {file_path}: {exc}")
         return None
 
 
 def generate_dashboard():
-    # Load dataset arrays
-    site_data = load_and_process_data(SITE_LOG)
-    repo_data = load_and_process_data(REPO_LOG)
+    fig, ax = plt.subplots(figsize=(16, 6))
+    data = load_repo_data(REPO_LOG)
 
-    # Initialize side-by-side plot layout frame
-    fig, (ax_site, ax_repo) = plt.subplots(1, 2, figsize=(16, 6))
-
-    # ----------------------------------------------------
-    # LEFT PANEL: Website Access Statistics (vogtpet.github.io/NHK/)
-    # ----------------------------------------------------
-    if site_data is not None:
-        df_site, site_date = site_data
-        df_site["CumulativeViews"] = df_site["DailyViews"].cumsum()
-
-        color = "tab:blue"
-        ax_site.set_xlabel("Date")
-        ax_site.set_ylabel("Daily Page Views", color=color)
-        ax_site.bar(
-            df_site[site_date],
-            df_site["DailyViews"],
-            color=color,
-            alpha=0.6,
-            label="Daily Views",
-        )
-        ax_site.tick_params(axis="y", labelcolor=color)
-
-        ax_site_twin = ax_site.twinx()
-        color = "tab:red"
-        ax_site_twin.set_ylabel("Overall Cumulative Access", color=color)
-        ax_site_twin.plot(
-            df_site[site_date],
-            df_site["CumulativeViews"],
-            color=color,
-            linewidth=2,
-            marker="o",
-            label="Cumulative",
-        )
-        ax_site_twin.tick_params(axis="y", labelcolor=color)
-        ax_site.set_title("Website Access Stats (*.github.io/NHK/)")
-    else:
-        ax_site.text(
+    if data is None:
+        ax.text(
             0.5,
             0.5,
-            f"Website Log Missing\n({SITE_LOG})",
+            f"Repository traffic log missing\n({REPO_LOG})",
             ha="center",
             va="center",
         )
+        ax.set_axis_off()
+    else:
+        df, date_col = data
+        view_col = "count" if "count" in df.columns else df.columns[1]
+        unique_col = "uniques" if "uniques" in df.columns else df.columns[2]
 
-    # ----------------------------------------------------
-    # RIGHT PANEL: GitHub Repository Traffic (://github.com)
-    # ----------------------------------------------------
-    if repo_data is not None:
-        df_repo, repo_date = repo_data
-        # Match standard GitHub repository tracking fields ('count' and 'uniques')
-        view_col = (
-            "count"
-            if "count" in df_repo.columns
-            else ("Views" if "Views" in df_repo.columns else df_repo.columns[1])
+        view_color = "tab:green"
+        ax.bar(
+            df[date_col],
+            df[view_col],
+            color=view_color,
+            alpha=0.65,
+            width=0.8,
+            label="Total views",
         )
-        unique_col = (
-            "uniques"
-            if "uniques" in df_repo.columns
-            else (
-                "Uniques"
-                if "Uniques" in df_repo.columns
-                else df_repo.columns[2]
-            )
-        )
+        ax.set_ylabel("Total repository views", color=view_color)
+        ax.tick_params(axis="y", labelcolor=view_color)
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
-        color = "tab:green"
-        ax_repo.set_xlabel("Date")
-        ax_repo.set_ylabel("Total Git Repository Views", color=color)
-        ax_repo.bar(
-            df_repo[repo_date],
-            df_repo[view_col],
-            color=color,
-            alpha=0.6,
-            label="Total Views",
-        )
-        ax_repo.tick_params(axis="y", labelcolor=color)
-
-        ax_repo_twin = ax_repo.twinx()
-        color = "tab:purple"
-        ax_repo_twin.set_ylabel("Unique Visitors", color=color)
-        ax_repo_twin.plot(
-            df_repo[repo_date],
-            df_repo[unique_col],
-            color=color,
+        ax_twin = ax.twinx()
+        unique_color = "tab:purple"
+        ax_twin.plot(
+            df[date_col],
+            df[unique_col],
+            color=unique_color,
             linewidth=2,
             marker="s",
-            label="Unique Visitors",
+            label="Unique visitors",
         )
-        ax_repo_twin.tick_params(axis="y", labelcolor=color)
-        ax_repo.set_title("Repository Code Views (://github.com)")
-    else:
-        ax_repo.text(
-            0.5,
-            0.5,
-            f"Repository Log Missing\n({REPO_LOG})",
-            ha="center",
-            va="center",
-        )
+        ax_twin.set_ylabel("Unique visitors", color=unique_color)
+        ax_twin.tick_params(axis="y", labelcolor=unique_color)
+        ax_twin.yaxis.set_major_locator(MaxNLocator(integer=True))
 
-    plt.suptitle(
-        "Unified Analytics Dashboard: NHK Project",
-        fontsize=16,
-        fontweight="bold",
+        # Label every data point so the last day is never missing or shifted.
+        ax.set_xticks(df[date_col])
+        ax.set_xticklabels(
+            df[date_col].dt.strftime("%Y-%m-%d"), rotation=45, ha="right", fontsize=8
+        )
+        ax.set_xlim(
+            df[date_col].min() - pd.Timedelta(hours=12),
+            df[date_col].max() + pd.Timedelta(hours=12),
+        )
+        ax.set_xlabel("Date")
+        ax.set_title("GitHub Repository Traffic – vogtpet/NHK")
+
+        handles, labels = ax.get_legend_handles_labels()
+        twin_handles, twin_labels = ax_twin.get_legend_handles_labels()
+        ax.legend(handles + twin_handles, labels + twin_labels, loc="upper left", frameon=False)
+
+    fig.suptitle(
+        "NHK Project – Repository Analytics", fontsize=16, fontweight="bold"
     )
     fig.tight_layout()
-
-    # Save and display canvas frame
-    plt.savefig(OUTPUT_IMAGE)
-    print(f"Dashboard successfully generated and saved to '{OUTPUT_IMAGE}'.")
-    plt.show()
+    plt.savefig(OUTPUT_IMAGE, dpi=100)
+    plt.close(fig)
+    print(f"Dashboard written to {OUTPUT_IMAGE}")
 
 
 if __name__ == "__main__":
