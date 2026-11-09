@@ -30,6 +30,15 @@ h1 { font-size:30px; line-height:1.25; margin:6px 0 8px; }
 .table-wrap { overflow-x:auto; margin:0 0 18px; }
 table { width:100%; border-collapse:collapse; font-size:15px; }
 th, td { border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+.book-table { width:100%; border-collapse:collapse; font-size:14px; }
+.book-table td { border:1px solid var(--line); padding:6px 8px; vertical-align:top; }
+.book-table.pollen { min-width:640px; font-size:12px; }
+.book-table.pollen td { border:1px solid #000; padding:2px 4px; }
+.pollen-head { background:#d6d5d5; text-align:center; }
+.pollen-label { text-align:left; font-weight:600; }
+.pollen-weak { background:#929292; }
+.pollen-strong { background:#000; }
+.pollen-none { background:transparent; }
 h2 { font-size:20px; margin:30px 0 10px; padding-top:4px; }
 h3 { font-size:17px; margin:22px 0 8px; }
 p { margin:0 0 14px; }

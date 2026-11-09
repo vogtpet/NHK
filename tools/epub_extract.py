@@ -29,6 +29,7 @@ NS = "{http://www.w3.org/1999/xhtml}"
 BOLD_CLASSES = {"c17", "c2", "p6", "p8"}
 ITALIC_CLASSES = {"c8"}
 BULLETS = {"-", "\u2013", "\u2022"}
+_LINK_RESOLVER = None
 
 
 def local(tag: str) -> str:
@@ -93,8 +94,14 @@ def _inline(el) -> str:
             inner = _inline(child)
             if href.startswith(("http://", "https://")):
                 parts.append(f'<a href="{html.escape(href)}">{inner}</a>')
+            elif _LINK_RESOLVER is not None:
+                resolved = _LINK_RESOLVER(href)
+                if resolved:
+                    parts.append(f'<a href="{html.escape(resolved)}">{inner}</a>')
+                else:
+                    parts.append(inner)
             else:
-                parts.append(inner)  # internal book links become plain text
+                parts.append(inner)
         else:
             parts.append(_inline(child))
         if child.tail:
@@ -203,12 +210,16 @@ def extract_chapter(
     image_dir: Path | None = None,
     image_prefix: str = "",
     image_slug: str = "",
+    link_resolver=None,
+    alt_texts=(),
 ) -> tuple[str, list[str]]:
     """Return (body_html, plain_blocks) for one chapter file.
 
     plain_blocks is used only for the meta description: it contains the title
     line first, then every block's plain text.
     """
+    global _LINK_RESOLVER
+    _LINK_RESOLVER = link_resolver
     with zipfile.ZipFile(epub_path) as z:
         root = ET.fromstring(z.read("OPS/" + chapter_file))
 
@@ -223,6 +234,7 @@ def extract_chapter(
     first_h1 = True
     first_tagline = True
     pending_caption = False
+    image_index = 0
 
     def flush_list():
         nonlocal list_items
@@ -294,15 +306,41 @@ def extract_chapter(
         if tag == "table":
             flush_list()
             rows = []
+            pollen = False
             for tr in el.findall(f".//{NS}tr"):
                 cells = tr.findall(f"{NS}td") + tr.findall(f"{NS}th")
-                rendered = [_clean_inline(_inline(td)) for td in cells]
-                if any(rendered):
-                    rows.append("<tr>" + "".join(f"<td>{c}</td>" for c in rendered) + "</tr>")
-                    plain.extend(_plain(td) for td in cells if _plain(td))
+                rendered = []
+                has_content = False
+                for td in cells:
+                    content = _clean_inline(_inline(td))
+                    if content:
+                        has_content = True
+                    colspan = td.get("colspan")
+                    attrs = f' colspan="{html.escape(colspan)}"' if colspan else ""
+                    classes = set(td.get("class", "").split())
+                    extra = ""
+                    if "tc6" in classes:
+                        extra = ' class="pollen-weak" title="schwacher Pollenflug"'
+                        pollen = True
+                    elif "tc7" in classes:
+                        extra = ' class="pollen-strong" title="starker Pollenflug"'
+                        pollen = True
+                    elif "tc8" in classes:
+                        extra = ' class="pollen-none" title="kein Pollenflug"'
+                        pollen = True
+                    elif classes & {"tc3", "tc4", "tc11"}:
+                        extra = ' class="pollen-head"'
+                    elif "tc5" in classes:
+                        extra = ' class="pollen-label"'
+                    rendered.append(f"<td{attrs}{extra}>{content}</td>")
+                    if _plain(td):
+                        plain.append(_plain(td))
+                if has_content or any(("pollen-weak" in x or "pollen-strong" in x) for x in rendered):
+                    rows.append("<tr>" + "".join(rendered) + "</tr>")
             if rows:
+                table_class = "book-table pollen" if pollen else "book-table"
                 out.append(
-                    '<div class="table-wrap"><table>\n'
+                    f'<div class="table-wrap"><table class="{table_class}">\n'
                     + "\n".join("        " + row for row in rows)
                     + "\n      </table></div>"
                 )
@@ -328,9 +366,11 @@ def extract_chapter(
                 image_dir.mkdir(parents=True, exist_ok=True)
                 base = image_dir / (f"{image_slug}__{Path(src).stem}" if image_slug else Path(src).stem)
                 saved = _save_optimized(data, base)
+                alt = alt_texts[image_index] if image_index < len(alt_texts) else "Abbildung aus dem Buch"
+                image_index += 1
                 rendered_images.append(
                     f'<img src="{html.escape(image_prefix + saved.name)}" '
-                    f'alt="Abbildung aus dem Buch" loading="lazy">'
+                    f'alt="{html.escape(alt)}" loading="lazy">'
                 )
             if not rendered_images:
                 continue

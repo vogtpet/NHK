@@ -61,6 +61,26 @@ DESCRIPTION_OVERRIDE = {
     "Vorwort": "Vorwort zur Neuauflage 2026: Willi Vogt über Naturheilkunde, "
     "Selbsthilfe und die Entstehung des Buches. Kostenlos online lesen.",
 }
+ALT_TEXT = {
+    "vorwort": [
+        "Der Kranke hat nur einen Wunsch, der Gesunde viele.",
+        "Die besten Ärzte weit und breit sind die Natur, Geduld und Zeit.",
+    ],
+    "einleitung": [
+        "Das Ökosystem Landwirtschaft.",
+        "Wer gesund ist, weiß nicht, wie reich er ist.",
+    ],
+    "alzheimer": ["Alzheimer Uhrentest"],
+    "angst": [
+        "Akupressurpunkt in der Beugeseite des Handgelenks",
+        "Akupunkturpunkte an den Nasenflügeln",
+    ],
+    "arteriosklerose": ["Gesunde Arterie und drei Stadien der Arterienverkalkung"],
+    "arthrose": [
+        "Hirse",
+        "In der Rückenlage abwechselnd mit dem linken und dem rechten Fuß eine imaginäre Wand wegdrücken",
+    ],
+}
 
 LIGATURES = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "ft", "ﬆ": "st"}
 VOCAB: set[str] = set()
@@ -367,6 +387,22 @@ def main():
     built_chapters = [c for c in chapters if c["slug"] in built]
     total_pages = 0
 
+    file_to_ch = {}
+    if args.source == "epub":
+        for ch in chapters:
+            ec = epub_by_title.get(norm_title(ch["title"]))
+            if ec:
+                file_to_ch[ec["file"]] = ch
+
+    def resolve_link(href: str):
+        file, _, _fragment = href.partition("#")
+        target = file_to_ch.get(file)
+        if target is None:
+            return None
+        if target["slug"] in built:
+            return f'../{target["slug"]}/'
+        return f'../docs/NHK2026.pdf#page={target["start"]}'
+
     def link_for(ch):
         if ch["slug"] in built:
             return f'<a href="../{ch["slug"]}/">{html.escape(DISPLAY.get(ch["title"], ch["title"]))}</a>'
@@ -384,6 +420,8 @@ def main():
                 image_dir=SITE_ROOT / "assets" / "images",
                 image_prefix="../assets/images/",
                 image_slug=ch["slug"],
+                link_resolver=resolve_link,
+                alt_texts=ALT_TEXT.get(ch["slug"], []),
             )
             blocks = [ch["title"]] + plain_blocks
             total_pages += ch["end"] - ch["start"] + 1
