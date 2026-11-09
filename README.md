@@ -1,9 +1,9 @@
-**🌐 [Online lesen](https://vogtpet.github.io/NHK/) · [PDF herunterladen](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.pdf) · [eBook herunterladen](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.epub)**
+**🌐 [Online lesen](https://vogtpet.github.io/NHK/) · [PDF herunterladen](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/docs/NHK2026.pdf) · [eBook herunterladen](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/docs/NHK2026.epub)**
 
 ---
 
 <p align="center">
-  <img src="assets/front.png" alt="Front Cover" width="600">
+  <img src="docs/assets/front.png" alt="Front Cover" width="600">
 </p>
 
 Naturheilkunde für den Hausgebrauch
@@ -11,8 +11,8 @@ Naturheilkunde für den Hausgebrauch
 
 ## 📥 Download & Online Lesen:
 - 🌐 **[Direkt im Browser lesen (Interaktiv)](https://vogtpet.github.io/NHK/)**
-- 📄 **[PDF-Version herunterladen (9 MB, Neuauflage 10/2026)](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.pdf)**
-- 📄 **[eBook-Version herunterladen (25 MB, Neuauflage 10/2026)](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/NHK2026.epub)**
+- 📄 **[PDF-Version herunterladen (9 MB, Neuauflage 10/2026)](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/docs/NHK2026.pdf)**
+- 📄 **[eBook-Version herunterladen (25 MB, Neuauflage 10/2026)](https://raw.githubusercontent.com/vogtpet/NHK/main/docs/docs/NHK2026.epub)**
 
 
 a) Werk & Urheberschaft:
