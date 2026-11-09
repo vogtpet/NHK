@@ -163,6 +163,15 @@ ALT_TEXT = {
         "Depressiver Gesichtsausdruck",
         "Froher Gesichtsausdruck",
     ],
+    "alter": ["Japanischer Tulpenbaum"],
+    "augen": ["Waterloh-Kur"],
+    "herz": [
+        "Taillenwert-Beispiel: Taillenumfang 80 cm geteilt durch Hüftumfang 90 cm = 0,88",
+    ],
+    "bezugsquellen": [
+        "Tabelle von Bezugsquellen",
+        "Buchrückseite",
+    ],
 }
 
 LIGATURES = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "ft", "ﬆ": "st"}
