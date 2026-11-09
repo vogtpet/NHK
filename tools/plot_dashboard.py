@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import matplotlib
 
@@ -7,8 +8,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
 
-REPO_LOG = "traffic/views.csv"
-OUTPUT_IMAGE = "unified_dashboard_analytics.png"
+ROOT = Path(__file__).resolve().parent.parent
+REPO_LOG = ROOT / "traffic" / "views.csv"
+OUTPUT_IMAGE = ROOT / "tools" / "unified_dashboard_analytics.png"
 
 
 def load_repo_data(file_path):

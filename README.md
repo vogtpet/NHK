@@ -72,5 +72,5 @@ Dieses E-Book enthält keine Telemetrie, keine Cookies und keine externen Inhalt
 
 ## 📊 Repository Traffic
 
-![GitHub repository views and unique visitors](unified_dashboard_analytics.png)
+![GitHub repository views and unique visitors](tools/unified_dashboard_analytics.png)
 
