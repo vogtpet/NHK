@@ -110,6 +110,59 @@ ALT_TEXT = {
         "Salzstreuer durchgestrichen",
         "Schultern hochziehen",
     ],
+    "ischialgie-hexenschuss": [
+        "Akupressurpunkt in der Mulde zwischen der Spitze des Außenknöchels zur oberen Fersenbeinkante",
+    ],
+    "kinderkrankheiten": [
+        "Kleinkind und Baby",
+        "Hemd getränkt in Salzwasser",
+        "Baby",
+    ],
+    "korn-vollkorn": ["Längsschnitt durch ein Getreidekorn"],
+    "krebs": [
+        "Kohlkopf",
+        "Schwein – durchgestrichen",
+        "Interaktive Krebstherapie – basierend auf biologischer, psychologischer und Chemo-/Strahlentherapie",
+        "Hummel",
+    ],
+    "lachen": ["Lachendes Kleinkind"],
+    "leber": ["Akupressurpunkt zwischen erstem und zweitem Mittelfußknochen"],
+    "lunge": [
+        "Zinnkraut",
+        "In der Rückenlage ein Buch auf den Bauch legen",
+    ],
+    "nase": ["Kühlung des Nackens mit einem feuchten Tuch"],
+    "oele-fette": [
+        "Fettsäuren: einfach und mehrfach ungesättigte und Omega-3-Fettsäure",
+        "Überblick der gesättigten Fettsäuren",
+        "Taube mit Olivenzweig",
+    ],
+    "rheuma": ["Sellerieknolle"],
+    "schmerzen": [
+        "Akupressurpunkt zwischen Zeigefinger und Daumen",
+        "Akupressurpunkt in der Mulde zwischen der Spitze des Außenknöchels zur oberen Fersenbeinkante",
+        "Akupressurpunkt in der Mulde zwischen der ersten und zweiten Zehe",
+    ],
+    "schwitzen": ["Salbeipflanze"],
+    "uebergewicht": [
+        "BMI-Beispiel: Gewicht in Kilogramm geteilt durch Körpergröße in Metern zum Quadrat, hier 70 Kilogramm und 1,70 Meter ergibt einen BMI von 24,2",
+        "Akupressurpunkt zwischen Nase und Oberlippe",
+        "Akupressurpunkt auf der Handkantenmitte",
+    ],
+    "venen": ["Wadenmuskelpumpe und Venenklappe"],
+    "verstopfung": [
+        "Dreieck von oben nach unten: Suppe/Obst = Schnellzug, Gemüse/Salat = Personenzug, Kartoffeln/Fleisch = Güterzug",
+        "Akupressurpunkt zwischen Zeigefinger und Daumen",
+    ],
+    "wickel-auflagen": [
+        "Kalte Umschläge sind besser als warme Ratschläge",
+        "Halswickel",
+        "Hemd getränkt in Salzwasser",
+    ],
+    "richtige-ernaehrung": [
+        "Depressiver Gesichtsausdruck",
+        "Froher Gesichtsausdruck",
+    ],
 }
 
 LIGATURES = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "ft", "ﬆ": "st"}
