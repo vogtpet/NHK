@@ -38,7 +38,7 @@ BASE_URL = "https://vogtpet.github.io/NHK"
 SITE_NAME = "Naturheilkunde für den Hausgebrauch"
 PUBLISHED = "2026-10-01"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
-LASTMOD = "2026-11-08"
+LASTMOD = "2026-11-09"
 
 # Chapters built by --pilot (title -> optional display title override)
 PILOT = [
@@ -56,6 +56,10 @@ PILOT = [
 DISPLAY = {
     "Hypertonie": "Hypertonie (Bluthochdruck)",
     "Husten / Heiserkeit": "Husten und Heiserkeit",
+}
+DESCRIPTION_OVERRIDE = {
+    "Vorwort": "Vorwort zur Neuauflage 2026: Willi Vogt über Naturheilkunde, "
+    "Selbsthilfe und die Entstehung des Buches. Kostenlos online lesen.",
 }
 
 LIGATURES = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "ft", "ﬆ": "st"}
@@ -373,7 +377,14 @@ def main():
             epub_ch = epub_by_title.get(norm_title(ch["title"]))
             if epub_ch is None:
                 raise SystemExit(f'  no EPUB chapter for {ch["title"]!r}')
-            body, plain_blocks = extract_epub_chapter(EPUB_PATH, epub_ch["file"], ch["subs"])
+            body, plain_blocks = extract_epub_chapter(
+                EPUB_PATH,
+                epub_ch["file"],
+                ch["subs"],
+                image_dir=SITE_ROOT / "assets" / "images",
+                image_prefix="../assets/images/",
+                image_slug=ch["slug"],
+            )
             blocks = [ch["title"]] + plain_blocks
             total_pages += ch["end"] - ch["start"] + 1
         else:
@@ -413,6 +424,7 @@ def main():
         description = core + " Aus dem Buch von Heilpraktiker Willi Vogt, kostenlos online lesen."
         if len(description) > 158:
             description = description[:155].rsplit(" ", 1)[0] + "…"
+        description = DESCRIPTION_OVERRIDE.get(ch["title"], description)
 
         idx = chapters.index(ch)
         prev_ch = chapters[idx - 1] if idx > 0 else None

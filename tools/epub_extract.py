@@ -16,11 +16,14 @@ clean text layer. Its block conventions are:
 Text is clean, so no ligature/kerning repair is needed.
 """
 import html
+import io
 import re
 import unicodedata
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
+
+from PIL import Image
 
 NS = "{http://www.w3.org/1999/xhtml}"
 BOLD_CLASSES = {"c17", "c2", "p6", "p8"}
@@ -99,6 +102,24 @@ def _inline(el) -> str:
     return "".join(parts)
 
 
+def _save_optimized(data: bytes, base: Path) -> Path:
+    """Resize to max 1200px and save as WebP; fall back to the original bytes."""
+    try:
+        img = Image.open(io.BytesIO(data))
+        img.load()
+        if max(img.size) > 1200:
+            img.thumbnail((1200, 1200), Image.LANCZOS)
+        if img.mode not in ("RGB", "RGBA"):
+            img = img.convert("RGBA" if "A" in img.getbands() else "RGB")
+        target = base.with_suffix(".webp")
+        img.save(target, "WEBP", quality=88, method=6)
+        return target
+    except Exception:
+        target = base.with_suffix(".png")
+        target.write_bytes(data)
+        return target
+
+
 def _clean_inline(fragment: str) -> str:
     fragment = re.sub(r"</strong>\s*<strong>", "", fragment)
     fragment = re.sub(r"\s+", " ", fragment)
@@ -175,7 +196,14 @@ def parse_toc(epub_path: Path) -> list[dict]:
     return chapters
 
 
-def extract_chapter(epub_path: Path, chapter_file: str, sub_titles=()) -> tuple[str, list[str]]:
+def extract_chapter(
+    epub_path: Path,
+    chapter_file: str,
+    sub_titles=(),
+    image_dir: Path | None = None,
+    image_prefix: str = "",
+    image_slug: str = "",
+) -> tuple[str, list[str]]:
     """Return (body_html, plain_blocks) for one chapter file.
 
     plain_blocks is used only for the meta description: it contains the title
@@ -194,6 +222,7 @@ def extract_chapter(epub_path: Path, chapter_file: str, sub_titles=()) -> tuple[
     list_items: list[str] = []
     first_h1 = True
     first_tagline = True
+    pending_caption = False
 
     def flush_list():
         nonlocal list_items
@@ -215,6 +244,30 @@ def extract_chapter(epub_path: Path, chapter_file: str, sub_titles=()) -> tuple[
     for el in _iter_blocks(body):
         tag = local(el.tag)
         text = _plain(el)
+        classes = set(el.get("class", "").split())
+
+        if pending_caption:
+            if tag == "p" and not text:
+                continue
+            is_caption = False
+            if tag == "p" and text:
+                is_caption = (
+                    text.lower().startswith(
+                        ("mit freundlicher genehmigung", "quelle", "foto", "grafik", "abb.", "bild:")
+                    )
+                    or (
+                        "p2" in classes
+                        and len(text) <= 120
+                        and not _looks_like_heading(text)
+                        and not _is_tagline(text)
+                    )
+                )
+            if is_caption:
+                out[-1] += f"<figcaption>{_clean_inline(_inline(el))}</figcaption></figure>"
+                pending_caption = False
+                continue
+            out[-1] += "</figure>"
+            pending_caption = False
 
         if tag == "h1":
             if first_h1:
@@ -258,10 +311,45 @@ def extract_chapter(epub_path: Path, chapter_file: str, sub_titles=()) -> tuple[
         if tag != "p":
             continue
 
-        if not text:
+        imgs = el.findall(f".//{NS}img")
+        if imgs:
+            if image_dir is None:
+                continue
+            rendered_images = []
+            for img in imgs:
+                src = img.get("src", "")
+                if not src:
+                    continue
+                try:
+                    with zipfile.ZipFile(epub_path) as z:
+                        data = z.read("OPS/" + src)
+                except KeyError:
+                    continue
+                image_dir.mkdir(parents=True, exist_ok=True)
+                base = image_dir / (f"{image_slug}__{Path(src).stem}" if image_slug else Path(src).stem)
+                saved = _save_optimized(data, base)
+                rendered_images.append(
+                    f'<img src="{html.escape(image_prefix + saved.name)}" '
+                    f'alt="Abbildung aus dem Buch" loading="lazy">'
+                )
+            if not rendered_images:
+                continue
+
+            meaningful = text.replace("\ufffc", "").strip()
+            if meaningful:
+                flush_list()
+                fragment = _clean_inline(_inline(el))
+                out.append(f"<p>{_labelize(fragment, text)}</p>")
+                plain.append(text)
+
+            flush_list()
+            cls = "book-figure book-figure-row" if len(rendered_images) > 1 else "book-figure"
+            out.append(f'<figure class="{cls}">' + "".join(rendered_images))
+            pending_caption = True
             continue
 
-        classes = set(el.get("class", "").split())
+        if not text:
+            continue
 
         # Subsection headings: <h3> is handled above; p21/p6/p2 and TOC subs.
         if "p21" in classes and len(text) <= 80:
@@ -299,6 +387,9 @@ def extract_chapter(epub_path: Path, chapter_file: str, sub_titles=()) -> tuple[
         else:
             out.append(f"<p>{_labelize(fragment, text)}</p>")
         plain.append(text)
+
+    if pending_caption:
+        out[-1] += "</figure>"
 
     flush_list()
     return "\n      ".join(out), plain

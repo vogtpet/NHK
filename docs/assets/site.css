@@ -20,6 +20,12 @@ h1 { font-size:30px; line-height:1.25; margin:6px 0 8px; }
 .meta { color:var(--muted); font-size:14px; margin:0 0 22px; }
 .lead { font-size:19px; color:#3b4650; border-left:3px solid var(--accent); padding-left:14px; margin:0 0 26px; }
 .tagline { text-align:center; font-style:italic; color:var(--muted); margin:0 0 22px; }
+.book-figure { margin:0 0 24px; text-align:center; }
+.book-figure img { max-width:100%; height:auto; border-radius:4px; }
+.book-figure figcaption { font-size:13px; color:var(--muted); margin-top:6px; }
+.book-figure-row { display:flex; gap:12px; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
+.book-figure-row img { max-width:calc(50% - 6px); height:auto; }
+@media (max-width:600px) { .book-figure-row img { max-width:100%; } }
 .center { text-align:center; }
 .table-wrap { overflow-x:auto; margin:0 0 18px; }
 table { width:100%; border-collapse:collapse; font-size:15px; }
