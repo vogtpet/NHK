@@ -27,7 +27,7 @@ jobs:
 
       - name: Fetch GitHub Repository Code Views
         run: |
-          mkdir -p traffic
+          mkdir -p tools/traffic
           
           echo "=== RUNNING PYTHON REPO VIEW FETCH ==="
           python3 -c '
@@ -52,7 +52,7 @@ jobs:
               
               views_list = data.get("views", [])
               if views_list:
-                  csv_path = "traffic/views.csv"
+                  csv_path = "tools/traffic/views.csv"
                   existing = {}
                   
                   if os.path.exists(csv_path):
@@ -92,6 +92,6 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           # Add the updated logs as well as the freshly overwitten analytical graphic image file
-          git add traffic/ tools/unified_dashboard_analytics.png
+          git add tools/traffic/ tools/unified_dashboard_analytics.png
           git diff --quiet && git diff --staged --quiet || git commit -m "Update logs and refresh automated dashboard graphic analytics"
           git push

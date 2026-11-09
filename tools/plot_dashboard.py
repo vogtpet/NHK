@@ -9,7 +9,7 @@ import pandas as pd
 from matplotlib.ticker import MaxNLocator
 
 ROOT = Path(__file__).resolve().parent.parent
-REPO_LOG = ROOT / "traffic" / "views.csv"
+REPO_LOG = ROOT / "tools" / "traffic" / "views.csv"
 OUTPUT_IMAGE = ROOT / "tools" / "unified_dashboard_analytics.png"
 
 
