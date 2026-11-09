@@ -80,6 +80,36 @@ ALT_TEXT = {
         "Hirse",
         "In der Rückenlage abwechselnd mit dem linken und dem rechten Fuß eine imaginäre Wand wegdrücken",
     ],
+    "atmung": ["Tiefes Einatmen und Ausatmen"],
+    "bandscheiben": [
+        "Belastung und Entlastung der Bandscheibe",
+        "Wer immer sitzt kommt auf den Hund, wer läuft und schwitzt der bleibt gesund",
+        "Stufenlagerung: Auf den Fußboden legen, Unterschenkel auf einem Stuhl lagern",
+        "Mit gespreizten Beinen auf dem Stuhl sitzen und mit beiden Händen die Knie von innen nach außen drücken",
+        "Vierfüßlerstand",
+        "Akupressur in der Mulde zwischen der Spitze des Außenknöchels zur oberen Fersenbeinkante",
+    ],
+    "bauchmassage": ["Bauchmassage"],
+    "chronologie": ["Energie-Stern"],
+    "darm": ["Baum mit Wurzel Grafik, linker Teil gesund, rechter Teil krank"],
+    "depression": ["Depressiver Gesichtsausdruck", "Froher Gesichtsausdruck"],
+    "diabetes": [
+        "Normwerte für Nicht-Diabetiker und Diabetiker, nüchtern und nach dem Essen",
+        "Hoher und niedriger glykämischer Index",
+    ],
+    "dinkel-brot": ["Dinkel – Ähren", "Dinkel – Körner"],
+    "dorn-methode": ["Wirbelsäule"],
+    "entsaeuerung": [
+        "Yin-Yang-Zeichen",
+        "pH-Wert-Skala im Säure-Basen-Gleichgewicht",
+        "Ungleiche Höhe der Dauben einer Tonne",
+        "Hühner",
+        "Säure-Basen-Waage, geneigt zur sauren Seite",
+    ],
+    "hypertonie-bluthochdruck": [
+        "Salzstreuer durchgestrichen",
+        "Schultern hochziehen",
+    ],
 }
 
 LIGATURES = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "ft", "ﬆ": "st"}
