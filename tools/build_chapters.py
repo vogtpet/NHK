@@ -3,9 +3,11 @@
 Build per-chapter HTML pages for the NHK web edition.
 
 Source of truth:
-  - docs/NHK2026.epub     -> chapter text (default: clean XHTML per chapter)
-  - docs/NHK2026.pdf      -> page numbers, bookmarks, PDF fallback extraction
-  - index.html            -> table of contents (titles + start pages)
+  - docs/docs/NHK2026.epub -> chapter text (default: clean XHTML per chapter)
+  - docs/docs/NHK2026.pdf  -> page numbers, bookmarks, PDF fallback extraction
+  - docs/index.html        -> table of contents (titles + start pages)
+
+  The published site lives in docs/ (GitHub Pages source: main /docs).
 
 Usage:
   python3 tools/build_chapters.py --pilot     # 10 pilot chapters
@@ -29,8 +31,9 @@ logging.getLogger("pypdf").setLevel(logging.ERROR)
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parent.parent
-PDF_PATH = ROOT / "docs" / "NHK2026.pdf"
-EPUB_PATH = ROOT / "docs" / "NHK2026.epub"
+SITE_ROOT = ROOT / "docs"
+PDF_PATH = SITE_ROOT / "docs" / "NHK2026.pdf"
+EPUB_PATH = SITE_ROOT / "docs" / "NHK2026.epub"
 BASE_URL = "https://vogtpet.github.io/NHK"
 SITE_NAME = "Naturheilkunde für den Hausgebrauch"
 PUBLISHED = "2026-10-01"
@@ -241,7 +244,7 @@ def slugify(text: str) -> str:
 
 # ---------------------------------------------------------------- structure
 def parse_toc():
-    src = (ROOT / "index.html").read_text(encoding="utf-8")
+    src = (SITE_ROOT / "index.html").read_text(encoding="utf-8")
     rows = re.findall(
         r'class="toc-link" href="docs/NHK2026\.pdf#page=(\d+)"[^>]*><span>(.*?)</span>', src
     )
@@ -338,7 +341,7 @@ def main():
 
     toc = parse_toc()
     chapters = parse_chapters(toc, page_count)
-    on_disk = {c["slug"] for c in chapters if (ROOT / c["slug"] / "index.html").exists()}
+    on_disk = {c["slug"] for c in chapters if (SITE_ROOT / c["slug"] / "index.html").exists()}
 
     if args.all:
         selected = chapters
@@ -432,7 +435,7 @@ def main():
             next=next_html,
             jsonld=build_jsonld(ch, url, description),
         )
-        target = ROOT / ch["slug"] / "index.html"
+        target = SITE_ROOT / ch["slug"] / "index.html"
         target.parent.mkdir(exist_ok=True)
         target.write_text(out, encoding="utf-8")
         print(f'  {ch["slug"]:<28} S. {ch["start"]:>3}–{ch["end"]:<3} {len(body):>6} bytes')
@@ -466,7 +469,7 @@ def write_hub(selected, chapters, built):
             else:
                 items.append(f'<li><a class="pdf" href="../docs/NHK2026.pdf#page={ch["start"]}">{label}</a></li>')
         out.append(f'<h2 class="letter">{letter}</h2>\n<ul class="letters">\n  ' + "\n  ".join(items) + "\n</ul>")
-    target = ROOT / "wissen" / "index.html"
+    target = SITE_ROOT / "wissen" / "index.html"
     target.parent.mkdir(exist_ok=True)
     built_chapters = [c for c in chapters if c["slug"] in built]
     jsonld = json.dumps(
@@ -519,7 +522,7 @@ def write_sitemap(built_chapters):
     for loc, mod in urls:
         lines.append(f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{mod}</lastmod>\n  </url>")
     lines.append("</urlset>\n")
-    (ROOT / "sitemap.xml").write_text("\n".join(lines), encoding="utf-8")
+    (SITE_ROOT / "sitemap.xml").write_text("\n".join(lines), encoding="utf-8")
     print(f"  sitemap.xml  ({len(urls)} URLs)")
 
 
