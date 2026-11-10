@@ -90,7 +90,7 @@ jobs:
           site = os.environ["GOATCOUNTER_SITE"].strip()
           token = os.environ["GOATCOUNTER_TOKEN"].strip()
           end = datetime.datetime.now(datetime.timezone.utc).replace(minute=0, second=0, microsecond=0)
-          start = end - datetime.timedelta(days=30)
+          start = end - datetime.timedelta(days=14)
           qs = urllib.parse.urlencode({
               "start": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
               "end": end.strftime("%Y-%m-%dT%H:%M:%SZ"),
