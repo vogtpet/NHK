@@ -38,7 +38,7 @@ BASE_URL = "https://vogtpet.github.io/NHK"
 SITE_NAME = "Naturheilkunde für den Hausgebrauch"
 PUBLISHED = "2026-10-01"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
-LASTMOD = "2026-11-09"
+LASTMOD = "2026-11-10"
 
 # Chapters built by --pilot (title -> optional display title override)
 PILOT = [

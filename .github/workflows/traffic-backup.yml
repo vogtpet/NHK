@@ -80,6 +80,39 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.METRICS_TOKEN }}
 
+      - name: Fetch GoatCounter Website Stats
+        run: |
+          mkdir -p tools/traffic
+          python3 - <<'PY'
+          import datetime, json, os, urllib.parse, urllib.request
+          from pathlib import Path
+
+          site = os.environ["GOATCOUNTER_SITE"].strip()
+          token = os.environ["GOATCOUNTER_TOKEN"].strip()
+          end = datetime.datetime.now(datetime.timezone.utc).replace(minute=0, second=0, microsecond=0)
+          start = end - datetime.timedelta(days=30)
+          qs = urllib.parse.urlencode({
+              "start": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "end": end.strftime("%Y-%m-%dT%H:%M:%SZ"),
+          })
+          req = urllib.request.Request(
+              f"https://{site}.goatcounter.com/api/v0/stats/total?{qs}",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Content-Type": "application/json",
+              },
+          )
+          with urllib.request.urlopen(req) as response:
+              data = json.load(response)
+          rows = sorted((s["day"], int(s.get("daily", 0))) for s in data.get("stats", []))
+          out = Path("tools/traffic/site_views.csv")
+          out.write_text("Date,visits\n" + "".join(f"{day},{visits}\n" for day, visits in rows))
+          print(f"GoatCounter: {len(rows)} days, {sum(v for _, v in rows)} visits")
+          PY
+        env:
+          GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
+          GOATCOUNTER_SITE: ${{ vars.GOATCOUNTER_SITE }}
+
       - name: Generate Unified Dashboard Graphic Image
         run: |
           echo "=== EXECUTING PYTHON DATA VISUALIZATION ENGINE ==="
