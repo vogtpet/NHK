@@ -74,3 +74,23 @@ Dieses E-Book enthält keine Telemetrie, keine Cookies und keine externen Inhalt
 
 ![Website visits and GitHub repository views](tools/unified_dashboard_analytics.png)
 
+The chart covers the last 14 days. Daily values are accumulated in
+`tools/traffic/history.csv`, because the GitHub traffic API only exposes
+14 days; GoatCounter website tracking began on 10 November 2026.
+
+### Traffic summary
+
+`tools/traffic_summary.csv` holds the monthly and yearly totals:
+
+| Column | Meaning |
+|---|---|
+| `granularity` | `month`, `year` or `all` |
+| `period` | `YYYY-MM`, `YYYY` or `all` |
+| `website_visits` | GoatCounter page views in the period |
+| `repo_views` | GitHub repository views in the period |
+| `repo_unique_visitors` | Sum of the daily unique-visitor values (not deduplicated across days) |
+
+The workflow refreshes the history and the summary on every run:
+`tools/update_traffic_history.py` then `tools/summarize_traffic.py`.
+
+
