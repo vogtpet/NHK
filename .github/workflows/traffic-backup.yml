@@ -5,6 +5,10 @@ on:
     - cron: '0 0 * * *' # Runs daily at midnight
   workflow_dispatch: # Allows manual trigger testing inside Actions tab
 
+concurrency:
+  group: traffic-dashboard
+  cancel-in-progress: false
+
 jobs:
   backup:
     runs-on: ubuntu-latest
@@ -136,4 +140,5 @@ jobs:
           # Add the updated logs as well as the freshly overwitten analytical graphic image file
           git add tools/traffic/ tools/traffic_summary.csv tools/unified_dashboard_analytics.png
           git diff --quiet && git diff --staged --quiet || git commit -m "Update logs and refresh automated dashboard graphic analytics"
+          git pull --rebase origin main
           git push
