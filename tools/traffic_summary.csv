@@ -1,5 +1,5 @@
 granularity,period,website_visits,repo_views,repo_unique_visitors
 month,2026-10,0,76,21
-month,2026-11,1,301,17
-year,2026,1,377,38
-all,all,1,377,38
+month,2026-11,12,301,17
+year,2026,12,377,38
+all,all,12,377,38
