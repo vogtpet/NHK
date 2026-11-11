@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SITE_LOG = ROOT / "tools" / "traffic" / "site_views.csv"  # GoatCounter
 REPO_LOG = ROOT / "tools" / "traffic" / "views.csv"       # GitHub repository views
 OUTPUT_IMAGE = ROOT / "tools" / "unified_dashboard_analytics.png"
+WINDOW_DAYS = 14
 
 
 def load_data(path: Path):
@@ -23,6 +24,9 @@ def load_data(path: Path):
         df = df.dropna(subset=[date_col]).sort_values(date_col)
         if df.empty:
             return None
+        # The log files keep long-term history for the summary CSV; the chart
+        # stays a readable sliding window.
+        df = df.tail(WINDOW_DAYS)
         return df, date_col
     except Exception as exc:
         print(f"Warning: could not read {path}: {exc}")
