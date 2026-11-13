@@ -60,7 +60,9 @@ def generate_dashboard():
             df[date_col], df["visits"], color="tab:blue", alpha=0.65, width=0.8,
             label="Visits",
         )
-        ax_site.set_title("Website Visits (GoatCounter)")
+        ax_site.set_title(
+            f"Website Visits (GoatCounter) · to {df[date_col].iloc[-1]:%d %b %Y}"
+        )
         ax_site.set_ylabel("Visits per day")
         ax_site.yaxis.set_major_locator(MaxNLocator(integer=True))
         ax_site.set_xlabel("Date")
@@ -98,7 +100,9 @@ def generate_dashboard():
         ax_twin.tick_params(axis="y", labelcolor="tab:purple")
         ax_twin.yaxis.set_major_locator(MaxNLocator(integer=True))
 
-        ax_repo.set_title("GitHub Repository Traffic – vogtpet/NHK")
+        ax_repo.set_title(
+            f"GitHub Repository Traffic – vogtpet/NHK · to {df[date_col].iloc[-1]:%d %b %Y}"
+        )
         ax_repo.set_xlabel("Date")
         set_date_ticks(ax_repo, df, date_col)
         handles, labels = ax_repo.get_legend_handles_labels()
@@ -117,7 +121,17 @@ def generate_dashboard():
     fig.suptitle(
         "NHK Project – Website & Repository Traffic", fontsize=16, fontweight="bold"
     )
-    fig.tight_layout()
+    fig.text(
+        0.5,
+        0.01,
+        "GitHub repository traffic lags about two days behind GoatCounter; "
+        "each panel ends at its latest available day.",
+        ha="center",
+        va="bottom",
+        fontsize=8,
+        color="#555555",
+    )
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
     plt.savefig(OUTPUT_IMAGE, dpi=100)
     plt.close(fig)
     print(f"Dashboard written to {OUTPUT_IMAGE}")
