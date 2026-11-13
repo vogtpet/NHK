@@ -93,4 +93,17 @@ The chart covers the last 14 days. Daily values are accumulated in
 The workflow refreshes the history and the summary on every run:
 `tools/update_traffic_history.py` then `tools/summarize_traffic.py`.
 
+### Development environment
+
+The scripts in `tools/` run in a local virtual environment:
+
+```bash
+python3 -m venv --system-site-packages .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+`.venv/` is gitignored. On this Mac the venv reuses the system Python's
+pandas, matplotlib and Pillow; `requirements.txt` lists everything needed
+for a clean rebuild on another machine.
+
 
